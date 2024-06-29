@@ -1,10 +1,7 @@
 import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
-import BasicInfo from './pages/BasicInfo'
-import ModePage from './pages/ModePage'
-import QuestionPage from './pages/QuestionPage'
-import ResultPage from './pages/ResultPage'
+import Controller from './Controller'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import './App.css'
 
@@ -52,10 +49,7 @@ const theme = createTheme({
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <BasicInfo/>
-      <ModePage/>
-      <QuestionPage/>
-      <ResultPage/>
+      <Controller/>
     </ThemeProvider>
   )
 }

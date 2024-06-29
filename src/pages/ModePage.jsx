@@ -1,23 +1,20 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Typography, Box, Button, Grid } from '@mui/material';
+import React, { useState } from 'react';
+import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const primary = '#26A69A';
 
-const ModePage = () => {
+const ModePage = ({ onComplete }) => {
   const theme = useTheme();
   const [selected, setSelected] = useState({
-    grade: null,
-    level: null,
-    number: null,
-    mode: null,
+    grade: '一年級',
+    level: '簡單',
+    number: '1',
+    mode: '立即回饋',
   });
 
   const [errors, setErrors] = useState({});
-
-  useEffect(() => {
-    console.log(selected);
-  }, [selected]);
 
   const handleButtonClick = (category, value) => {
     setSelected((prevState) => ({
@@ -37,23 +34,34 @@ const ModePage = () => {
       setErrors(newErrors);
     } else {
       setErrors({});
-      console.log(selected);
+      onComplete(selected);
     }
+  };
+
+  const boxStyle = {
+    width: '100%', 
+    mb: 2, 
+    backgroundColor: '#E0E0E0', 
+    padding: 2, 
+    borderRadius: 2,
+    border: 'none',  // 添加這行來去除邊框
+    boxShadow: 'none'  // 添加這行來去除陰影
   };
 
   return (
     <Container
       maxWidth="sm"
       style={{
-        height: '100vh',
+        minHeight: '100vh',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: theme.palette.background.default,
+        padding: '20px',
       }}
     >
-      <Box sx={{ width: '100%', mb: 4, backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2 }}>
+      <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           字庫 {errors.grade && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
         </Typography>
@@ -79,7 +87,8 @@ const ModePage = () => {
           ))}
         </Grid>
       </Box>
-      <Box sx={{ width: '100%', mb: 4, backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2 }}>
+
+      <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           難易度 {errors.level && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
         </Typography>
@@ -105,12 +114,13 @@ const ModePage = () => {
           ))}
         </Grid>
       </Box>
-      <Box sx={{ width: '100%', mb: 4, backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2 }}>
+
+      <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           題目數 {errors.number && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
         </Typography>
         <Grid container spacing={1}>
-          {['1題', '5題', '10題'].map((number) => (
+          {['1', '5', '10'].map((number) => (
             <Grid item xs={4} key={number}>
               <Button
                 variant="contained"
@@ -125,13 +135,14 @@ const ModePage = () => {
                   },
                 }}
               >
-                {number}
+                {number}題
               </Button>
             </Grid>
           ))}
         </Grid>
       </Box>
-      <Box sx={{ width: '100%', mb: 4, backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2 }}>
+
+      <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           回饋模式 {errors.mode && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
         </Typography>
@@ -157,7 +168,48 @@ const ModePage = () => {
           ))}
         </Grid>
       </Box>
-      <Button variant="contained" color="primary" fullWidth onClick={handleStartTest}>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          詳細設置
+        </Typography>
+        <Accordion 
+          sx={{ 
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            '&:before': {
+              display: 'none',
+            },
+          }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography>點擊展開更多設置</Typography>
+          </AccordionSummary>
+          <AccordionDetails
+            sx={{
+              backgroundColor: '#F5F5F5',
+              borderRadius: 2,
+              mt: 1,
+            }}
+          >
+            <Typography>
+              這裡可以添加更多的設置選項，例如倒數時間等。
+            </Typography>
+          </AccordionDetails>
+        </Accordion>
+      </Box>
+
+      <Button 
+        variant="contained" 
+        color="primary" 
+        fullWidth 
+        onClick={handleStartTest}
+        sx={{ mt: 2 }}
+      >
         開始測驗
       </Button>
     </Container>
