@@ -31,6 +31,7 @@ const BouncingBallsBackground = ({ ballCount = 15 }) => {
       ctx.beginPath();
       ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
       ctx.fillStyle = ball.color;
+      ctx.lineWidth = 1;
       ctx.fill();
       ctx.closePath();
     };
