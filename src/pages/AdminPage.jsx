@@ -71,7 +71,7 @@ const AdminPage = () => {
       <Divider />
       <List>
         {[
-          { text: '儀表板', icon: <DashboardIcon />, page: 'dashboard' },
+          { text: '統計資料', icon: <DashboardIcon />, page: 'dashboard' },
           { text: '題目管理', icon: <LibraryAddIcon />, page: 'questions' }
         ].map((item) => (
           <ListItem key={item.text} disablePadding>
@@ -98,85 +98,6 @@ const AdminPage = () => {
     </div>
   );
 
-  const renderDashboard = () => (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" gutterBottom>
-            用戶統計
-          </Typography>
-          <Typography>總用戶數：{userStats.totalUsers}</Typography>
-          <Typography>活躍用戶：{userStats.activeUsers}</Typography>
-          <Typography>平均分數：{userStats.averageScore}</Typography>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" gutterBottom>
-            題目統計
-          </Typography>
-          <Typography>總題目數：{questionStats.totalQuestions}</Typography>
-          <Typography variant="subtitle1">題目類別：</Typography>
-          <List dense>
-            {questionStats.categories.map((category, index) => (
-              <ListItem key={index}>
-                <ListItemText primary={category} />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Typography variant="h6" gutterBottom>
-            難度分佈
-          </Typography>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#8884d8"
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <Box mt={2}>
-            {pieData.map((entry, index) => (
-              <Typography key={index} variant="body2">
-                {entry.name}: {entry.value}%
-              </Typography>
-            ))}
-          </Box>
-        </Paper>
-      </Grid>
-    </Grid>
-  );
-
-  const renderQuestions = () => (
-    <Paper sx={{ p: 2 }}>
-      <Typography variant="h6" gutterBottom>
-        題目管理
-      </Typography>
-      <Box sx={{ mt: 2 }}>
-        <Button variant="contained" color="primary" sx={{ mr: 2 }}>
-          新增題目
-        </Button>
-        <Button variant="contained" color="secondary">
-          刪除題目
-        </Button>
-      </Box>
-    </Paper>
-  );
-
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar
@@ -198,7 +119,7 @@ const AdminPage = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div">
-            {currentPage === 'dashboard' ? '儀表板' : '題目管理'}
+            {currentPage === 'dashboard' ? '統計資料' : '題目管理'}
           </Typography>
         </Toolbar>
       </AppBar>
@@ -234,11 +155,11 @@ const AdminPage = () => {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 3, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, pt: 4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
       >
-        <Toolbar />
-        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-          {currentPage === 'dashboard' ? <DashboardPage/> : <QuestionManagementPage/>}
+        <Container maxWidth="lg" sx={{ mt: 4 , mb: 0 }}>
+          {currentPage === 'dashboard' && <DashboardPage/>}
+          {currentPage === 'questions' && <QuestionManagementPage/>}
         </Container>
       </Box>
     </Box>

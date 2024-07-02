@@ -1,103 +1,206 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
-  Grid, 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableContainer, 
+  TableHead, 
+  TableRow, 
   Paper, 
-  Typography, 
-  List, 
-  ListItem, 
-  ListItemText, 
-  Box 
+  TextField, 
+  Button, 
+  Typography,
+  useMediaQuery,
+  Collapse,
+  Box
 } from '@mui/material';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer
-} from 'recharts';
+import { useTheme } from '@mui/material/styles';
 
-// 模擬數據
-const userStats = {
-  totalUsers: 1000,
-  activeUsers: 750,
-  averageScore: 85
+const styles = {
+  container: {
+    display: 'flex',
+    height: '90vh',
+    width: '100%',
+    fontFamily: 'Arial, sans-serif',
+  },
+  mainContent: {
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    padding: '16px',
+    overflowY: 'auto',
+  },
+  title: {
+    marginBottom: '16px',
+  },
+  searchInput: {
+    marginBottom: '16px',
+  },
+  tableContainer: {
+    flexGrow: 1,
+    overflowY: 'auto',
+  },
+  selectedRow: {
+    backgroundColor: '#e6f3ff',
+  },
+  detailsPanel: {
+    width: '300px',
+    padding: '16px',
+    backgroundColor: '#f9f9f9',
+    borderLeft: '1px solid #ddd',
+    overflowY: 'auto',
+  },
+  detailsTitle: {
+    marginBottom: '12px',
+  },
+  detailsContent: {
+    display: 'grid',
+    gridTemplateColumns: '1fr',
+    gap: '8px',
+  },
 };
-
-const questionStats = {
-  totalQuestions: 500,
-  categories: ['字形', '詞義', '句型', '閱讀理解']
-};
-
-const pieData = [
-  { name: '簡單', value: 30 },
-  { name: '中等', value: 50 },
-  { name: '困難', value: 20 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
 const DashboardPage = () => {
-  return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" gutterBottom>
-            用戶統計
-          </Typography>
-          <Typography>總用戶數：{userStats.totalUsers}</Typography>
-          <Typography>活躍用戶：{userStats.activeUsers}</Typography>
-          <Typography>平均分數：{userStats.averageScore}</Typography>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-          <Typography variant="h6" gutterBottom>
-            題目統計
-          </Typography>
-          <Typography>總題目數：{questionStats.totalQuestions}</Typography>
-          <Typography variant="subtitle1">題目類別：</Typography>
-          <List dense>
-            {questionStats.categories.map((category, index) => (
-              <ListItem key={index}>
-                <ListItemText primary={category} />
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-      <Grid item xs={12} md={4}>
-        <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-          <Typography variant="h6" gutterBottom>
-            難度分佈
-          </Typography>
-          <ResponsiveContainer width="100%" height={200}>
-            <PieChart>
-              <Pie
-                data={pieData}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={80}
-                fill="#8884d8"
-                paddingAngle={5}
-                dataKey="value"
-              >
-                {pieData.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-            </PieChart>
-          </ResponsiveContainer>
-          <Box mt={2}>
-            {pieData.map((entry, index) => (
-              <Typography key={index} variant="body2">
-                {entry.name}: {entry.value}%
-              </Typography>
-            ))}
-          </Box>
-        </Paper>
-      </Grid>
-    </Grid>
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRow, setSelectedRow] = useState(null);
+  const theme = useTheme();
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+
+  // 模擬數據
+  const data = [
+    {
+      name: '張三',
+      researchCode: 'A001',
+      time: '2023-07-01 14:30',
+      accuracy: '85%',
+      details: {
+        wordBank: '一年級',
+        difficulty: '簡單',
+        questionCount: 10,
+        feedbackMode: '立即反饋',
+        additionalSettings: '倒計時: 30秒'
+      }
+    },
+    {
+      name: '李四',
+      researchCode: 'B002',
+      time: '2023-07-02 10:15',
+      accuracy: '92%',
+      details: {
+        wordBank: '二年級',
+        difficulty: '中等',
+        questionCount: 15,
+        feedbackMode: '答題後反饋',
+        additionalSettings: '允許跳過: 是'
+      }
+    },
+    // 為了演示滾動效果，添加更多數據
+    ...Array(20).fill().map((_, i) => ({
+      name: `測試用戶 ${i+3}`,
+      researchCode: `T00${i+3}`,
+      time: '2023-07-03 09:00',
+      accuracy: '88%',
+      details: {
+        wordBank: '三年級',
+        difficulty: '困難',
+        questionCount: 20,
+        feedbackMode: '混合模式',
+        additionalSettings: '時間限制: 45分鐘'
+      }
+    }))
+  ];
+
+  const filteredData = useMemo(() => {
+    return data.filter(item => 
+      item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.researchCode.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [data, searchTerm]);
+
+  const toggleDetails = (index) => {
+    setSelectedRow(selectedRow === index ? null : index);
+  }; 
+
+  const renderDetails = (item) => (
+    <Box sx={{ margin: 1 }}>
+      <Typography><strong>姓名:</strong> {item.name}</Typography>
+      <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
+      <Typography><strong>時間:</strong> {item.time}</Typography>
+      <Typography><strong>正確率:</strong> {item.accuracy}</Typography>
+      <Typography><strong>字庫:</strong> {item.details.wordBank}</Typography>
+      <Typography><strong>難易度:</strong> {item.details.difficulty}</Typography>
+      <Typography><strong>題目數:</strong> {item.details.questionCount}</Typography>
+      <Typography><strong>反饋模式:</strong> {item.details.feedbackMode}</Typography>
+      <Typography><strong>詳細設置:</strong> {item.details.additionalSettings}</Typography>
+    </Box>
   );
-}
+
+  return (
+    <div style={isSmallScreen ? {} : styles.container}>
+      <div style={styles.mainContent}>
+        <TextField
+          fullWidth
+          placeholder="搜尋姓名或研究代號..."
+          variant="outlined"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={styles.searchInput}
+        />
+        <TableContainer component={Paper} style={styles.tableContainer}>
+          <Table stickyHeader aria-label="sticky table">
+            <TableHead>
+              <TableRow>
+                <TableCell>姓名</TableCell>
+                <TableCell>研究代號</TableCell>
+                <TableCell>時間</TableCell>
+                <TableCell>正確率</TableCell>
+                <TableCell>操作</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {filteredData.map((item, index) => (
+                <React.Fragment key={index}>
+                  <TableRow 
+                    style={selectedRow === index ? styles.selectedRow : {}}
+                  >
+                    <TableCell>{item.name}</TableCell>
+                    <TableCell>{item.researchCode}</TableCell>
+                    <TableCell>{item.time}</TableCell>
+                    <TableCell>{item.accuracy}</TableCell>
+                    <TableCell>
+                      <Button 
+                        onClick={() => toggleDetails(index)}
+                        color="primary"
+                      >
+                        {selectedRow === index ? '隱藏詳情' : '查看詳情'}
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                  {isSmallScreen && (
+                    <TableRow>
+                      <TableCell colSpan={5} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                        <Collapse in={selectedRow === index} timeout="auto" unmountOnExit>
+                          {renderDetails(item)}
+                        </Collapse>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </React.Fragment>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </div>
+      {!isSmallScreen && (
+        <div style={styles.detailsPanel}>
+          <Typography variant="h6" style={styles.detailsTitle}>
+            {selectedRow !== null ? '詳細資訊' : '請選擇一行查看詳情'}
+          </Typography>
+          {selectedRow !== null && renderDetails(filteredData[selectedRow])}
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default DashboardPage;
