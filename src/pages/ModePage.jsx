@@ -3,7 +3,6 @@ import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, 
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
-const primary = '#26A69A';
 
 const ModePage = ({ onComplete }) => {
   const theme = useTheme();

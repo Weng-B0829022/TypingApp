@@ -4,7 +4,6 @@ import ModePage from './pages/ModePage'
 import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
 import AdminPage from './pages/AdminPage'
-import BouncingBallsBackground from './pages/BouncingBallsBackground';
 
 const Controller = () => {
   const [currentPage, setCurrentPage] = useState(0)

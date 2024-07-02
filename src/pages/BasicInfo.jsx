@@ -3,8 +3,8 @@ import { TextField, Button, Container, Typography, Box } from '@mui/material';
 import BouncingBallsBackground from './BouncingBallsBackground'; // 確保路徑正確
 
 const BasicInfo = ({ onComplete }) => {
-  const [name, setName] = useState('ABC');
-  const [researchCode, setResearchCode] = useState('123');
+  const [name, setName] = useState('admin');
+  const [researchCode, setResearchCode] = useState('admin');
 
   const handleSubmit = (event) => {
     event.preventDefault();
