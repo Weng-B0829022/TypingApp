@@ -226,7 +226,7 @@ const AdminPage = () => {
         component="main"
         sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`, md:'100%'} }}
       >
-        <Container maxWidth="lg" sx={{ mt: 10, mb: 0 }}>
+        <Container maxWidth="lg" sx={{ mt: 10, mb: 0 , width:'100%'}}>
           {currentPage === 'dashboard' && <DashboardPage />}
           {currentPage === 'questions' && <QuestionManagementPage />}
         </Container>
