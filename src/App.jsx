@@ -61,7 +61,6 @@ function App() {
     <ThemeProvider theme={theme}>
       <Router>
         <Routes>
-          <Route path="/admin" element={<AdminPage />} />
           <Route path="/" element={<Controller />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

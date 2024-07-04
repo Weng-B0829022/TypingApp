@@ -14,6 +14,7 @@ import {
   Collapse,
   Box
 } from '@mui/material';
+
 import { useTheme } from '@mui/material/styles';
 
 const styles = {
@@ -61,6 +62,13 @@ const styles = {
     gridTemplateColumns: '1fr',
     gap: '8px',
   },
+  classPanel: {
+    width: '250px',
+    height: '220px',
+    backgroundColor: '#f8f8f8',
+    overflowY: 'auto',
+    borderRadius:'8px'
+  }
 };
 
 const DashboardPage = () => {
@@ -69,13 +77,21 @@ const DashboardPage = () => {
   const theme = useTheme();
   const isMiduimScreen = useMediaQuery(theme.breakpoints.down('lg'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
+  const [grade, setGrade] = useState('');
+  const [difficulty, setDifficulty] = useState('');
+
+  const handleGradeChange = (newGrade) => {
+    setGrade(grade === newGrade ? '' : newGrade);
+  };
+
+  const handleDifficultyChange = (newDifficulty) => {
+    setDifficulty(difficulty === newDifficulty ? '' : newDifficulty);
+  };
   // 模擬數據
   const data = [
     {
       name: '張三',
       researchCode: 'A001',
-      time: '2023-07-01 14:30',
-      accuracy: '85%',
       details: {
         wordBank: '一年級',
         difficulty: '簡單',
@@ -87,8 +103,6 @@ const DashboardPage = () => {
     {
       name: '李四',
       researchCode: 'B002',
-      time: '2023-07-02 10:15',
-      accuracy: '92%',
       details: {
         wordBank: '二年級',
         difficulty: '中等',
@@ -101,8 +115,6 @@ const DashboardPage = () => {
     ...Array(20).fill().map((_, i) => ({
       name: `測試用戶 ${i+3}`,
       researchCode: `T00${i+3}`,
-      time: '2023-07-03 09:00',
-      accuracy: '88%',
       details: {
         wordBank: '三年級',
         difficulty: '困難',
@@ -138,20 +150,48 @@ const DashboardPage = () => {
     </Box>
   );
 
+  const classPanel = () =>{
+    return <div style={styles.classPanel}>
+          <Typography variant="subtitle1" gutterBottom>
+            年級
+          </Typography>
+          <div style={styles.buttonGroup}>
+            {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((g) => (
+              <Button 
+                key={g} 
+                variant={grade === g ? "contained" : "outlined"}
+                onClick={() => handleGradeChange(g)}
+                style={grade === g ? styles.selectedButton : {}}
+              >
+                {g}
+              </Button>
+            ))}
+          </div>
+          <Typography variant="subtitle1" gutterBottom>
+            難度
+          </Typography>
+          <div style={styles.buttonGroup}>
+            {['簡單', '中等', '困難'].map((d) => (
+              <Button 
+                key={d} 
+                variant={difficulty === d ? "contained" : "outlined"}
+                onClick={() => handleDifficultyChange(d)}
+                style={difficulty === d ? styles.selectedButton : {}}
+              >
+                {d}
+              </Button>
+            ))}
+          </div>
+        </div>
+  }
+
   return (
     <div style={isMiduimScreen ? isSmallScreen? {} : {display:'flex'} : styles.container}>
       {!isSmallScreen && (
-        <div style={styles.detailsPanel}>
-          <Typography variant="h6" style={styles.detailsTitle}>
-            {selectedRow !== null ? '詳細資訊' : '請選擇一行查看詳情'}
-          </Typography>
-          {selectedRow !== null && renderDetails(filteredData[selectedRow])}
-        </div>
+        classPanel()
       )}
       {isSmallScreen && (
-        <div>
-          456
-        </div>
+        classPanel()
       )}
       <div style={styles.mainContent}>
         <TextField

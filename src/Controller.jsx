@@ -3,6 +3,7 @@ import BasicInfo from './pages/BasicInfo'
 import ModePage from './pages/ModePage'
 import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
+import AdminPage from './pages/AdminPage'
 
 const Controller = () => {
   const [currentPage, setCurrentPage] = useState(0)
@@ -37,14 +38,17 @@ const Controller = () => {
     nextPage()
     // 這裡可以添加完成所有關卡後的邏輯
   }
+  const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
 
   return (
-      <>
-        {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
-        {currentPage === 1 && <ModePage onComplete={handleModeComplete}/>}
-        {currentPage === 2 && <QuestionPage onComplete={handleQuestionComplete} />}
-        {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
-      </>
+    <>
+      {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
+      {currentPage === 1 && (
+        isAdmin ? <AdminPage /> : <ModePage onComplete={handleModeComplete} />
+      )}
+      {currentPage === 2 && <QuestionPage onComplete={handleQuestionComplete} />}
+      {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
+    </>
   );
 }
 
