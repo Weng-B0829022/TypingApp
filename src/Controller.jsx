@@ -41,14 +41,14 @@ const Controller = () => {
   const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
 
   return (
-    <>
+    <div style={{width:'100vw', height:'100vh'}}>
       {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
       {currentPage === 1 && (
         isAdmin ? <AdminPage /> : <ModePage onComplete={handleModeComplete} />
       )}
       {currentPage === 2 && <QuestionPage onComplete={handleQuestionComplete} />}
       {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
-    </>
+    </div>
   );
 }
 

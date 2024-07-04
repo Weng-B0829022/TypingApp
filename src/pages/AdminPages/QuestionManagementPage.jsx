@@ -60,16 +60,15 @@ const styles = {
     height: '89vh',
     width: '100%',
     fontFamily: 'Arial, sans-serif',
-    position: 'fixed',
-    top: '0px',  
+    
   },
   mainContent: {
     flexGrow: 1,
     display: 'flex',
     flexDirection: 'column',
-    padding: '8px 16px',
+    padding: '0px',
     overflowY: 'auto',
-    width: '600px',
+    width: '100%',
   },
   title: {
     marginBottom: '16px',
@@ -78,13 +77,16 @@ const styles = {
     flexGrow: 1,
     overflowY: 'auto',
     borderRadius:'8px',
-    height: '100%',
+    height: '55vh',
+    
   },
   selectedRow: {
     backgroundColor: '#e6f3ff',
   },
   detailsPanel: {
     width: '300px',
+    marginLeft:'16px',
+    marginTop:'16px',
     backgroundColor: '#f8f8f8',
     overflowY: 'auto',
     borderRadius:'8px'
@@ -120,12 +122,12 @@ const styles = {
     width: '100%',
   },
   searchInput: {
-    width: '80%',
+    width: 'calc(90% - 64px)',
     marginRight: '4px',
     padding: '0px !important'
   },
   button: {
-    // 添加按鈕的基本樣式
+    padding:'5px'
   },
   selectedButton: {
     // 添加選中按鈕的樣式
@@ -151,11 +153,17 @@ const DashboardPage = () => {
   };
 
   const handleSearch = () => {
-    const result = data.filter(item => 
-      (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.researchCode.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
-    setFilteredData(result);
+    if(searchTerm){
+      const result = data.filter(item => 
+        (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.researchCode.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+      setFilteredData(result);
+    }else{
+      setFilteredData(data);
+    }
+    
+    
   };
 
   const toggleDetails = (index) => {
@@ -279,7 +287,6 @@ const DashboardPage = () => {
           </Table>
         </TableContainer>
       </div>
-      {/* 詳細資訊區塊 */}
       {!isMiduimScreen && (
         <div style={styles.detailsPanel}>
           <Typography variant="h6" style={styles.detailsTitle}>

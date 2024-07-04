@@ -168,7 +168,7 @@ const AdminPage = () => {
   }
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex' , height:'100vh'}}>
       <AppBar
         position="fixed"
         sx={{
@@ -224,9 +224,9 @@ const AdminPage = () => {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`, md:'100%'} }}
+        sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`} ,backgroundColor: '#bbbbbb'}}
       >
-        <Container maxWidth="lg" sx={{ mt: 10, mb: 0 , width:'100%'}}>
+        <Container maxWidth="lg" sx={{ mt: 8, mb: 0 , width:'100%', }}>
           {currentPage === 'dashboard' && <DashboardPage />}
           {currentPage === 'questions' && <QuestionManagementPage />}
         </Container>
