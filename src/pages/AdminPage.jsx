@@ -15,51 +15,61 @@ import {
   ListItemIcon,
   ListItemText,
   Container,
-  Grid,
-  Paper,
-  Button
+  TextField,
+  Button,
+  CircularProgress
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
   LibraryAdd as LibraryAddIcon
 } from '@mui/icons-material';
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer
-} from 'recharts';
 
 const drawerWidth = 240;
 
 const AdminPage = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [username, setUsername] = useState('a');
+  const [password, setPassword] = useState('a');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-  // 模擬數據
-  const userStats = {
-    totalUsers: 1000,
-    activeUsers: 750,
-    averageScore: 85
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:8080/authenticate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
+      setIsLoggedIn(true);
+    } catch (err) {
+      setError('帳號或密碼錯誤');
+      setUsername('')
+      setPassword('')
+      console.error('Login error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
-
-  const questionStats = {
-    totalQuestions: 500,
-    categories: ['字形', '詞義', '句型', '閱讀理解']
-  };
-
-  const pieData = [
-    { name: '簡單', value: 30 },
-    { name: '中等', value: 50 },
-    { name: '困難', value: 20 },
-  ];
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28'];
 
   const drawer = (
     <div>
@@ -97,6 +107,65 @@ const AdminPage = () => {
       </List>
     </div>
   );
+
+  if (false) {
+    return (
+      <Container component="main" maxWidth="xs">
+        <Box
+          sx={{
+            marginTop: 8,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Typography component="h1" variant="h5">
+            管理頁面
+          </Typography>
+          <Box component="form" onSubmit={handleLogin} noValidate sx={{ mt: 1 }}>
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              id="username"
+              label="名稱"
+              name="username"
+              autoComplete="username"
+              autoFocus
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <TextField
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              label="密碼"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+            {error && (
+              <Typography color="error" variant="caption" sx={{ mt: 1, display: 'block' }}>
+                {error}
+              </Typography>
+            )}
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              sx={{ mt: 3, mb: 2 }}
+              disabled={isLoading}
+            >
+              {isLoading ? <CircularProgress size={24} /> : '登入'}
+            </Button>
+          </Box>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -155,11 +224,11 @@ const AdminPage = () => {
       </Box>
       <Box
         component="main"
-        sx={{ flexGrow: 1, pt: 4, width: { sm: `calc(100% - ${drawerWidth}px)` } }}
+        sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`, md:'100%'} }}
       >
-        <Container maxWidth="lg" sx={{ mt: 4 , mb: 0 }}>
-          {currentPage === 'dashboard' && <DashboardPage/>}
-          {currentPage === 'questions' && <QuestionManagementPage/>}
+        <Container maxWidth="lg" sx={{ mt: 10, mb: 0 }}>
+          {currentPage === 'dashboard' && <DashboardPage />}
+          {currentPage === 'questions' && <QuestionManagementPage />}
         </Container>
       </Box>
     </Box>

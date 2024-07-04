@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import Controller from './Controller'
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import Controller from './Controller'
+import AdminPage from './pages/AdminPage'
 import './App.css'
-
 
 const theme = createTheme({
   palette: {
@@ -42,14 +41,31 @@ const theme = createTheme({
         },
       },
     },
-    
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          '&.MuiButtonBase-root:focus': {
+            outline: 'none',
+          },
+          '&.Mui-focusVisible': {
+            outline: 'none',
+          },
+        },
+      },
+    },
   },
 });
 
 function App() {
   return (
     <ThemeProvider theme={theme}>
-      <Controller/>
+      <Router>
+        <Routes>
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/" element={<Controller />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
     </ThemeProvider>
   )
 }

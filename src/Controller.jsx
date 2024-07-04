@@ -3,7 +3,6 @@ import BasicInfo from './pages/BasicInfo'
 import ModePage from './pages/ModePage'
 import QuestionPage from './pages/QuestionPage'
 import ResultPage from './pages/ResultPage'
-import AdminPage from './pages/AdminPage'
 
 const Controller = () => {
   const [currentPage, setCurrentPage] = useState(0)
@@ -42,9 +41,7 @@ const Controller = () => {
   return (
       <>
         {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
-        {currentPage === 1 && ((basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin') ?
-          <AdminPage onComplete={handleModeComplete} /> :
-          <ModePage onComplete={handleModeComplete} />)}
+        {currentPage === 1 && <ModePage onComplete={handleModeComplete}/>}
         {currentPage === 2 && <QuestionPage onComplete={handleQuestionComplete} />}
         {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
       </>

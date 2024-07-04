@@ -19,15 +19,18 @@ import { useTheme } from '@mui/material/styles';
 const styles = {
   container: {
     display: 'flex',
-    height: '90vh',
-    width: '100%',
+    height: '89vh',
+    width: '95%',
     fontFamily: 'Arial, sans-serif',
   },
   mainContent: {
     flexGrow: 1,
     display: 'flex',
     flexDirection: 'column',
-    padding: '16px',
+    paddingLeft: '16px',
+    paddingRight: '16px',
+    paddingTop: '8px',
+    paddingBottom: '8px',
     overflowY: 'auto',
   },
   title: {
@@ -39,16 +42,16 @@ const styles = {
   tableContainer: {
     flexGrow: 1,
     overflowY: 'auto',
+    borderRadius:'8px'
   },
   selectedRow: {
     backgroundColor: '#e6f3ff',
   },
   detailsPanel: {
     width: '300px',
-    padding: '16px',
-    backgroundColor: '#f9f9f9',
-    borderLeft: '1px solid #ddd',
+    backgroundColor: '#f8f8f8',
     overflowY: 'auto',
+    borderRadius:'8px'
   },
   detailsTitle: {
     marginBottom: '12px',
