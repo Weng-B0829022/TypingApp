@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -12,15 +12,22 @@ import {
   Typography,
   useMediaQuery,
   Collapse,
-  Box
+  Box,
+  Pagination,
+  IconButton,
+  Snackbar,
+  Alert
 } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@mui/material/styles';
+import DeleteConfirmationRow from './components/DeleteConfirmationRow';
+import styles from './styles/QuestionManagementPage_styles';
 
 // 模擬數據
-const data = [
+const initialData = [
   {
-    name: '張三',
-    researchCode: 'A001',
+    name: '你',
+    researchCode: '5',
     details: {
       wordBank: '一年級',
       difficulty: '簡單',
@@ -30,8 +37,8 @@ const data = [
     }
   },
   {
-    name: '李四',
-    researchCode: 'B002',
+    name: '好',
+    researchCode: '6',
     details: {
       wordBank: '二年級',
       difficulty: '中等',
@@ -41,9 +48,9 @@ const data = [
     }
   },
   // 為了演示滾動效果，添加更多數據
-  ...Array(20).fill().map((_, i) => ({
-    name: `測試用戶 ${i+3}`,
-    researchCode: `T00${i+3}`,
+  ...Array(10000).fill().map((_, i) => ({
+    name: `字詞 ${i + 3}`,
+    researchCode: `${i+3}`,
     details: {
       wordBank: '三年級',
       difficulty: '困難',
@@ -54,227 +61,206 @@ const data = [
   }))
 ];
 
-const styles = {
-  container: {
-    display: 'flex',
-    height: '89vh',
-    width: '100%',
-    fontFamily: 'Arial, sans-serif',
-    
-  },
-  mainContent: {
-    flexGrow: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    padding: '0px',
-    overflowY: 'auto',
-    width: '100%',
-  },
-  title: {
-    marginBottom: '16px',
-  },
-  tableContainer: {
-    flexGrow: 1,
-    overflowY: 'auto',
-    borderRadius:'8px',
-    height: '55vh',
-    
-  },
-  selectedRow: {
-    backgroundColor: '#e6f3ff',
-  },
-  detailsPanel: {
-    width: '300px',
-    marginLeft:'16px',
-    marginTop:'16px',
-    backgroundColor: '#f8f8f8',
-    overflowY: 'auto',
-    borderRadius:'8px'
-  },
-  detailsTitle: {
-    marginBottom: '12px',
-  },
-  detailsContent: {
-    display: 'grid',
-    gridTemplateColumns: '1fr',
-    gap: '8px',
-  },
-  classPanel: {
-    width: '100%',
-    backgroundColor: '#f8f8f8',
-    borderRadius: '8px',
-    display: 'flex',
-    flexDirection: 'column',
-    marginTop: '16px',
-    marginBottom: '16px',
-  },
-  buttonGroup: {
-    display: 'flex',
-    alignItems: 'flex-start',
-    gap: '4px',
-    marginBottom: '4px',
-  },
-  buttonSection: {
-    margin: '16px',
-  },
-  searchSection: {
-    gap: '4px',
-    width: '100%',
-  },
-  searchInput: {
-    width: 'calc(90% - 64px)',
-    marginRight: '4px',
-    padding: '0px !important'
-  },
-  button: {
-    padding:'5px'
-  },
-  selectedButton: {
-    // 添加選中按鈕的樣式
-  },
-};
+const ITEMS_PER_PAGE = 50; // 每页显示的项目数
 
-const DashboardPage = () => {
+const QuestionManagementPage = () => {
+  const [data, setData] = useState(initialData);
   const [selectedRow, setSelectedRow] = useState(null);
   const theme = useTheme();
-  const isMiduimScreen = useMediaQuery(theme.breakpoints.down('lg'));
+  const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
   const [grade, setGrade] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [filteredData, setFilteredData] = useState(data);
+  const [page, setPage] = useState(1);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleGradeChange = (newGrade) => {
-    setGrade(grade === newGrade ? '' : newGrade);
-  };
+  const filteredData = useMemo(() => {
+    return data.filter(item => 
+      (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.researchCode.toLowerCase().includes(searchTerm.toLowerCase())) &&
+      (grade ? item.details.wordBank === grade : true) &&
+      (difficulty ? item.details.difficulty === difficulty : true)
+    );
+  }, [searchTerm, grade, difficulty, data]);
 
-  const handleDifficultyChange = (newDifficulty) => {
-    setDifficulty(difficulty === newDifficulty ? '' : newDifficulty);
-  };
+  const paginatedData = useMemo(() => {
+    const startIndex = (page - 1) * ITEMS_PER_PAGE;
+    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredData, page]);
 
-  const handleSearch = () => {
-    if(searchTerm){
-      const result = data.filter(item => 
-        (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.researchCode.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-      setFilteredData(result);
-    }else{
-      setFilteredData(data);
-    }
-    
-    
-  };
+  const handleGradeChange = useCallback((newGrade) => {
+    setGrade(prevGrade => prevGrade === newGrade ? '' : newGrade);
+    setPage(1);                   //  重置頁碼
+    setDeleteConfirmation(null);  //  關閉刪除確認列
+    setSelectedRow(-1);           //  關閉詳細信息列
+  }, []);
 
-  const toggleDetails = (index) => {
-    setSelectedRow(selectedRow === index ? null : index);
-  };
+  const handleDifficultyChange = useCallback((newDifficulty) => {
+    setDifficulty(prevDifficulty => prevDifficulty === newDifficulty ? '' : newDifficulty);
+    setPage(1);                   //  重置頁碼
+    setDeleteConfirmation(null);  //  關閉刪除確認列
+    setSelectedRow(-1);           //  關閉詳細信息列
+  }, []);
 
-  const renderDetails = (item) => (
+  const handleSearch = useCallback((event) => {
+    setSearchTerm(event.target.value);
+    setPage(1);                   //  重置頁碼
+    setDeleteConfirmation(null);  //  關閉刪除確認列
+    setSelectedRow(-1);           //  關閉詳細信息列
+  }, []);
+
+  const toggleDetails = useCallback((index) => {
+    setSelectedRow(prevSelectedRow => prevSelectedRow === index ? null : index);
+    setDeleteConfirmation(null);
+  }, []);
+
+  const handlePageChange = useCallback((event, value) => {
+    setPage(value);
+  }, []);
+
+  const handleDelete = useCallback((index) => {
+    setSelectedRow(-1);
+    setDeleteConfirmation(prevIndex => prevIndex === index ? null : index);
+  }, []);
+
+  const confirmDelete = useCallback((index) => {
+    setData(prevData => prevData.filter((_, i) => i !== index));
+    setDeleteConfirmation(null);
+    setSelectedRow(null);
+    setSnackbarOpen(true);//顯示snacker
+  }, []);
+
+  const handleSnackbarClose = useCallback(() => {
+    setSnackbarOpen(false);
+  }, []);
+
+  const renderDetails = useCallback((item) => (
     <Box sx={{ margin: 1 }}>
       <Typography><strong>姓名:</strong> {item.name}</Typography>
       <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
       <Typography><strong>字庫:</strong> {item.details.wordBank}</Typography>
       <Typography><strong>難易度:</strong> {item.details.difficulty}</Typography>
-      <Typography><strong>題目數:</strong> {item.details.questionCount}</Typography>
+      <Typography><strong>题目數:</strong> {item.details.questionCount}</Typography>
       <Typography><strong>反饋模式:</strong> {item.details.feedbackMode}</Typography>
       <Typography><strong>詳細設置:</strong> {item.details.additionalSettings}</Typography>
     </Box>
-  );
+  ), []);
 
-
+  // 使用 useEffect 来处理过滤后数据变化时的逻辑
+  useEffect(() => {
+    if (filteredData.length > 0 && (page - 1) * ITEMS_PER_PAGE >= filteredData.length) {
+      setPage(1);
+    }
+  }, [filteredData, page]);
 
   return (
-    <div style={isMiduimScreen ? isSmallScreen? {} : {display:'flex'} : styles.container}>
+    <div style={isMediumScreen ? isSmallScreen ? {} : {display:'flex'} : styles.container}>
       <div style={styles.mainContent}>
-        {/* 搜尋區塊 */}
+        {/* 搜索区块 */}
         <div style={styles.classPanel}>
-          <div style={styles.contentWrapper}>
-            <div style={styles.buttonSection}>
-              <Typography variant="subtitle1" gutterBottom>
-                年級
-              </Typography>
-              <div style={styles.buttonGroup}>
-                {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((g) => (
+          <div style={styles.buttonSection}>
+            <Typography variant="subtitle1" gutterBottom>
+              年級
+            </Typography>
+            <div style={styles.buttonGroup}>
+              {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((g) => (
+                <Button 
+                  key={g} 
+                  variant={grade === g ? "contained" : "outlined"}
+                  onClick={() => handleGradeChange(g)}
+                  style={grade === g ? { ...styles.button, ...styles.selectedButton } : styles.button}
+                  fullWidth
+                >
+                  {g}
+                </Button>
+              ))}
+            </div>
+            <Typography variant="subtitle1" gutterBottom style={{textAlign: 'left', marginLeft:'80px'}}>
+              難度
+            </Typography>
+            <div style={styles.buttonGroup}>
+              <Box sx={{display:'flex'}}>
+                {['簡單', '中等', '困難'].map((d) => (
                   <Button 
-                    key={g} 
-                    variant={grade === g ? "contained" : "outlined"}
-                    onClick={() => handleGradeChange(g)}
-                    style={grade === g ? { ...styles.button, ...styles.selectedButton } : styles.button}
+                    key={d}
+                    variant={difficulty === d ? "contained" : "outlined"}
+                    onClick={() => handleDifficultyChange(d)}
+                    style={difficulty === d ? { ...styles.button, ...styles.selectedButton } : styles.button}
                     fullWidth
                   >
-                    {g}
+                    {d}
                   </Button>
                 ))}
-              </div>
-              <Typography variant="subtitle1" gutterBottom style={{textAlign: 'left', marginLeft:'80px'}}>
-                難度
-              </Typography>
-              <div style={styles.buttonGroup}>
-                <Box sx={{display:'flex'}}>
-                  {['簡單', '中等', '困難'].map((d) => (
-                    <Button 
-                      key={d}
-                      variant={difficulty === d ? "contained" : "outlined"}
-                      onClick={() => handleDifficultyChange(d)}
-                      style={difficulty === d ? { ...styles.button, ...styles.selectedButton } : styles.button}
-                      fullWidth
-                    >
-                      {d}
-                    </Button>
-                  ))}
-                </Box>
-                <div style={styles.searchSection}>
-                  <TextField
-                    placeholder="搜尋姓名或研究代號..."
-                    variant="outlined"
-                    size="small"
-                    style={styles.searchInput}
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                  />
-                  <Button 
-                    variant="outlined"
-                    onClick={handleSearch}
-                    style={styles.button}
-                  >
-                    搜尋
-                  </Button>
-                </div>
+              </Box>
+              <div style={styles.searchSection}>
+                <TextField
+                  placeholder="搜尋姓名或研究代號..."
+                  variant="outlined"
+                  size="small"
+                  style={styles.searchInput}
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
               </div>
             </div>
           </div>
         </div>
-        {/* 資料區塊 */}
+        {/* 数据区块 */}
         <TableContainer component={Paper} style={styles.tableContainer}>
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
                 <TableCell>姓名</TableCell>
-                <TableCell>研究代號</TableCell>
+                <TableCell>變種數</TableCell>
                 <TableCell>操作</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {filteredData.map((item, index) => (
+              {paginatedData.map((item, index) => (
                 <React.Fragment key={index}>
                   <TableRow 
                     style={selectedRow === index ? styles.selectedRow : {}}
                   >
-                    <TableCell>{item.name}</TableCell>
-                    <TableCell>{item.researchCode}</TableCell>
-                    <TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.name}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.researchCode}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}
+                    >
                       <Button 
                         onClick={() => toggleDetails(index)}
                         color="primary"
                       >
                         {selectedRow === index ? '隱藏詳情' : '查看詳情'}
                       </Button>
+                      <IconButton 
+                        aria-label="delete" 
+                        onClick={() => handleDelete(index)}
+                        sx={{
+                          '&:focus': {
+                            outline: 'none',
+                            boxShadow: 'none',
+                          },
+                        }}
+                      >
+                        <DeleteIcon />
+                      </IconButton>
                     </TableCell>
                   </TableRow>
-                  {isMiduimScreen && (
+                  {<TableRow>
+                      <TableCell colSpan={3} style={{ paddingBottom: 0, paddingTop: 0  }}>
+                        <Collapse in={deleteConfirmation === index} timeout="auto" unmountOnExit>
+                          <DeleteConfirmationRow
+                            index={index}
+                            onConfirm={() => confirmDelete(index)}
+                            onCancel={() => handleDelete(null)}
+                          />
+                        </Collapse>
+                      </TableCell>
+                  </TableRow>}
+                  {isMediumScreen && (
                     <TableRow>
-                      <TableCell colSpan={5} style={{ paddingBottom: 0, paddingTop: 0 }}>
+                      <TableCell colSpan={3} style={{ paddingBottom: 0, paddingTop: 0 , borderBottom: 'none' }}>
                         <Collapse in={selectedRow === index} timeout="auto" unmountOnExit>
                           {renderDetails(item)}
                         </Collapse>
@@ -286,17 +272,41 @@ const DashboardPage = () => {
             </TableBody>
           </Table>
         </TableContainer>
+        <Pagination
+          count={Math.ceil(filteredData.length / ITEMS_PER_PAGE)}
+          page={page}
+          onChange={handlePageChange}
+          color="primary"
+          style={{ 
+            marginTop: '-10px', 
+            display: 'flex', 
+            justifyContent: 'center' , 
+            backgroundColor: '#f8f8f8', 
+            zIndex: 999,
+            borderBottomLeftRadius: '8px',
+            borderBottomRightRadius: '8px'
+          }}
+        />
       </div>
-      {!isMiduimScreen && (
+      {!isMediumScreen && (
         <div style={styles.detailsPanel}>
           <Typography variant="h6" style={styles.detailsTitle}>
-            {selectedRow !== null ? '詳細資訊' : '請選擇一行查看詳情'}
+            {selectedRow !== null ? '詳細信息' : '點擊詳細訊息查看'}
           </Typography>
-          {selectedRow !== null && renderDetails(filteredData[selectedRow])}
+          {selectedRow !== null && renderDetails(paginatedData[selectedRow])}
         </div>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={5000}
+        onClose={handleSnackbarClose}
+      > 
+        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
+          刪除成功
+        </Alert>
+      </Snackbar>
     </div>
   );
 };
 
-export default DashboardPage;
+export default QuestionManagementPage;

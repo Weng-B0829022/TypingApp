@@ -106,6 +106,9 @@ const ResultPage = ({ resultInfo, onComplete }) => {
           總反應時間: {calculateTotalTime()} ms
         </Typography>
         <Typography variant="h6" gutterBottom>
+          正確題數: {rows.filter(row => row.userAnswer === row.correctAnswer).length}
+        </Typography>
+        <Typography variant="h6" gutterBottom>
           正確率: {calculateAccuracy()}%
         </Typography>
         <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 2 }}>

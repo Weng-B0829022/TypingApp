@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails, TextField } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-
 
 const ModePage = ({ onComplete }) => {
   const theme = useTheme();
@@ -11,6 +10,8 @@ const ModePage = ({ onComplete }) => {
     level: '簡單',
     number: '1',
     mode: '立即回饋',
+    startCountdown: 1 , // 新增倒數計時秒數的預設值
+    queIntervel: 0.1 // 題目間隔的等待時間
   });
 
   const [errors, setErrors] = useState({});
@@ -22,18 +23,28 @@ const ModePage = ({ onComplete }) => {
     }));
   };
 
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setSelected((prevState) => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
   const handleStartTest = () => {
     const newErrors = {};
     if (!selected.grade) newErrors.grade = true;
     if (!selected.level) newErrors.level = true;
     if (!selected.number) newErrors.number = true;
     if (!selected.mode) newErrors.mode = true;
+    if (!selected.startCountdown) newErrors.startCountdown = true;
+    if (!selected.queIntervel) newErrors.queIntervel = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
       setErrors({});
-      onComplete(selected);
+      onComplete(selected); // 確保傳遞所有選擇，包括倒數計時秒數和題目間隔時間
     }
   };
 
@@ -196,8 +207,47 @@ const ModePage = ({ onComplete }) => {
             }}
           >
             <Typography>
-              這裡可以添加更多的設置選項，例如倒數時間等。
+              開始時準備時間 {errors.startCountdown && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
             </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              name="startCountdown"
+              value={selected.startCountdown}
+              onChange={handleInputChange}
+              placeholder="輸入秒數"
+              sx={{ 
+                mt: 1,
+                width: '50%',   // 調整寬度
+                '& .MuiInputBase-root': {
+                  height: '30px', // 調整高度
+                },
+                '& .MuiInputBase-input': {
+                  padding: '5px 10px', // 調整內部填充
+                }
+              }}
+            />
+            <Typography>
+              題目顯示後的等待時間 {errors.queIntervel && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              name="queIntervel"
+              value={selected.queIntervel}
+              onChange={handleInputChange}
+              placeholder="輸入秒數"
+              sx={{ 
+                mt: 1,
+                width: '50%',   // 調整寬度
+                '& .MuiInputBase-root': {
+                  height: '30px', // 調整高度
+                },
+                '& .MuiInputBase-input': {
+                  padding: '5px 10px', // 調整內部填充
+                }
+              }}
+            />
           </AccordionDetails>
         </Accordion>
       </Box>

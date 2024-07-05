@@ -10,9 +10,9 @@ const questions = [
   { text: '日本好玩', tar: '目', ans: '錯誤' },
 ];
 
-const QuestionPage = ({ onComplete }) => {
+const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
   const [step, setStep] = useState(0);
-  const [countdown, setCountdown] = useState(1);
+  const [countdown, setCountdown] = useState(startCountdown);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
   const startTimeRef = useRef(null);
@@ -36,7 +36,7 @@ const QuestionPage = ({ onComplete }) => {
       const timer = setTimeout(() => {
         setStep(2);
         startTimeRef.current = Date.now(); // 開始計時
-      }, 1000);
+      }, queIntervel * 1000);
 
       return () => clearTimeout(timer);
     }
