@@ -230,6 +230,9 @@ const QuestionManagementPage = () => {
                       <Button 
                         onClick={() => toggleDetails(index)}
                         color="primary"
+                        sx={{
+                          padding: isMediumScreen ? '2px' : '8px'
+                        }}
                       >
                         {selectedRow === index ? '隱藏詳情' : '查看詳情'}
                       </Button>
@@ -241,6 +244,9 @@ const QuestionManagementPage = () => {
                             outline: 'none',
                             boxShadow: 'none',
                           },
+                          width: isMediumScreen ? '30px' : '40px',
+                          height: isMediumScreen ? '30px' : '40px',
+                          padding: isMediumScreen ? '2px' : '8px',
                         }}
                       >
                         <DeleteIcon />

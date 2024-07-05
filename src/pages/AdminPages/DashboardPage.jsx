@@ -51,7 +51,7 @@ const initialData = [
     }
   },
   // 為了演示滾動效果，添加更多數據
-  ...Array(20).fill().map((_, i) => ({
+  ...Array(200000).fill().map((_, i) => ({
     name: `測試用戶 ${i+3}`,
     researchCode: `T00${i+3}`,
     time: '2023-07-03 09:00',
@@ -240,6 +240,9 @@ const DashboardPage = () => {
                       <Button 
                         onClick={() => toggleDetails(index)}
                         color="primary"
+                        sx={{
+                          padding: isMediumScreen ? '2px' : '8px'
+                        }}
                       >
                         {selectedRow === index ? '隱藏詳情' : '查看詳情'}
                       </Button>
@@ -251,6 +254,9 @@ const DashboardPage = () => {
                             outline: 'none',
                             boxShadow: 'none',
                           },
+                          width: isMediumScreen ? '30px' : '40px',
+                          height: isMediumScreen ? '30px' : '40px',
+                          padding: isMediumScreen ? '2px' : '8px',
                         }}
                       >
                         <DeleteIcon />
