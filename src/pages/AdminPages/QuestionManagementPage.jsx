@@ -94,21 +94,21 @@ const QuestionManagementPage = () => {
     setGrade(prevGrade => prevGrade === newGrade ? '' : newGrade);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const handleDifficultyChange = useCallback((newDifficulty) => {
     setDifficulty(prevDifficulty => prevDifficulty === newDifficulty ? '' : newDifficulty);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const handleSearch = useCallback((event) => {
     setSearchTerm(event.target.value);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const toggleDetails = useCallback((index) => {
@@ -121,15 +121,16 @@ const QuestionManagementPage = () => {
   }, []);
 
   const handleDelete = useCallback((index) => {
-    setSelectedRow(-1);
+    console.log('index', index);
+    setSelectedRow(null);
     setDeleteConfirmation(prevIndex => prevIndex === index ? null : index);
   }, []);
 
-  const confirmDelete = useCallback((index) => {
-    setData(prevData => prevData.filter((_, i) => i !== index));
+  const confirmDelete = useCallback((item) => {
+    setData(prevData => prevData.filter(dataItem => dataItem !== item));
     setDeleteConfirmation(null);
     setSelectedRow(null);
-    setSnackbarOpen(true);//顯示snacker
+    setSnackbarOpen(true);
   }, []);
 
   const handleSnackbarClose = useCallback(() => {
@@ -137,6 +138,7 @@ const QuestionManagementPage = () => {
   }, []);
 
   const renderDetails = useCallback((item) => (
+    item &&
     <Box sx={{ margin: 1 }}>
       <Typography><strong>姓名:</strong> {item.name}</Typography>
       <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
@@ -258,7 +260,7 @@ const QuestionManagementPage = () => {
                         <Collapse in={deleteConfirmation === index} timeout="auto" unmountOnExit>
                           <DeleteConfirmationRow
                             index={index}
-                            onConfirm={() => confirmDelete(index)}
+                            onConfirm={() => confirmDelete(item)}
                             onCancel={() => handleDelete(null)}
                           />
                         </Collapse>
@@ -289,6 +291,7 @@ const QuestionManagementPage = () => {
             justifyContent: 'center' , 
             backgroundColor: '#f8f8f8', 
             zIndex: 999,
+            padding: '3px',
             borderBottomLeftRadius: '8px',
             borderBottomRightRadius: '8px'
           }}

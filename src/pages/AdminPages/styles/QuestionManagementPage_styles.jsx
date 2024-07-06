@@ -58,7 +58,7 @@ const commonStyles = {
       flexGrow: 1,
       overflowY: 'auto',
       borderRadius: '8px',
-      height: '55vh',
+      height: 'calc(100vh - 330px)',
     },
     selectedRow: {
       backgroundColor: '#e6f3ff',
