@@ -27,41 +27,15 @@ const Controller = () => {
     nextPage();
   };
 
-  const handleQuestionComplete = async (data) => {
+  const handleQuestionComplete = (data) => {
     setQuestionInfo(data);
-    console.log("測驗完成，所有答案：\n", basicInfo, modeInfo, data, resultInfo);
-    
-    // 發送請求到後端
-    try {
-      const response = await fetch('http://localhost:8080/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          basicInfo,
-          modeInfo,
-          questionInfo: data,
-          resultInfo,
-        }),
-      });
-
-      if (response.ok) {
-        console.log('數據發送成功');
-      } else {
-        console.error('數據發送失敗');
-      }
-    } catch (error) {
-      console.error('發送請求時出錯:', error);
-    }
-
     nextPage();
   };
 
   const handleResultComplete = (data) => {
     setResultInfo(data);
     nextPage();
-    // 這裡可以添加完成所有關卡後的邏輯
+    // Add logic for after completing all stages here
   };
 
   const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
@@ -73,13 +47,20 @@ const Controller = () => {
         isAdmin ? <AdminPage /> : <ModePage onComplete={handleModeComplete} />
       )}
       {currentPage === 2 && (
-        <QuestionPage 
-          startCountdown={modeInfo?.startCountdown} 
-          queIntervel={modeInfo?.queIntervel} 
+        <QuestionPage
+          startCountdown={modeInfo?.startCountdown}
+          queIntervel={modeInfo?.queIntervel}
           onComplete={handleQuestionComplete}
         />
       )}
-      {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
+      {currentPage === 3 && (
+        <ResultPage 
+          resultInfo={questionInfo} 
+          basicInfo={basicInfo}
+          modeInfo={modeInfo}
+          onComplete={handleResultComplete} 
+        />
+      )}
     </div>
   );
 };

@@ -15,7 +15,7 @@ const sharedContainerStyle = {
   backgroundColor: '#E0E0E0',
 };
 
-const ResultPage = ({ resultInfo, onComplete }) => {
+const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
   const [rows, setRows] = useState([]);
   const tableRef = useRef(null);
 
@@ -30,7 +30,35 @@ const ResultPage = ({ resultInfo, onComplete }) => {
     }));
     setRows(formattedRows);
     console.log("Result data loaded:", formattedRows);
-  }, [resultInfo]);
+
+    // Send request to backend immediately when component mounts
+    const sendData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            basicInfo,
+            modeInfo,
+            questionInfo: resultInfo,
+            resultInfo: formattedRows,
+          }),
+        });
+
+        if (response.ok) {
+          console.log('Data sent successfully');
+        } else {
+          console.error('Failed to send data');
+        }
+      } catch (error) {
+        console.error('Error sending request:', error);
+      }
+    };
+
+    sendData();
+  }, [resultInfo, basicInfo, modeInfo]);
 
   const handleShare = async () => {
     if (tableRef.current) {
@@ -51,7 +79,7 @@ const ResultPage = ({ resultInfo, onComplete }) => {
 
   const handleConfirm = () => {
     console.log("Results confirmed");
-    onComplete(rows);  // 傳遞完整的行數據
+    onComplete(rows);
   };
 
   const calculateTotalTime = () => {
@@ -61,6 +89,55 @@ const ResultPage = ({ resultInfo, onComplete }) => {
   const calculateAccuracy = () => {
     const correctAnswers = rows.filter(row => row.userAnswer === row.correctAnswer).length;
     return (correctAnswers / rows.length * 100).toFixed(2);
+  };
+
+  const ImageDownload = ({ imageUrl, fileName }) => {
+    const [isDownloading, setIsDownloading] = useState(false);
+  
+    const handleDownload = async () => {
+      setIsDownloading(true);
+      try {
+        // Fetch the image as a blob
+        const response = await fetch(imageUrl);
+        if (!response.ok) throw new Error('Network response was not ok');
+        const blob = await response.blob();
+  
+        // Create a temporary URL for the blob
+        const url = window.URL.createObjectURL(blob);
+  
+        // Create a temporary anchor element
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'image.png';
+        link.style.display = 'none';
+        document.body.appendChild(link);
+  
+        // Programmatically click the link to trigger the download
+        link.click();
+  
+        // Clean up
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(link);
+  
+        console.log("Image download initiated successfully");
+      } catch (error) {
+        console.error("Error initiating image download:", error);
+        // Here you might want to show an error message to the user
+      } finally {
+        setIsDownloading(false);
+      }
+    };
+  
+    return (
+      <Button 
+        variant="contained" 
+        color="primary" 
+        onClick={handleDownload}
+        startIcon={<ShareIcon />}
+      >
+        分享
+      </Button>
+    );
   };
 
   return (
@@ -128,14 +205,7 @@ const ResultPage = ({ resultInfo, onComplete }) => {
         </Typography>
         <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 2 }}>
           <Grid item>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleShare}
-              startIcon={<ShareIcon />}
-            >
-              分享
-            </Button>
+            <ImageDownload imageUrl="https://cdn.britannica.com/79/232779-050-6B0411D7/German-Shepherd-dog-Alsatian.jpg" fileName="result.jpg" />
           </Grid>
           <Grid item>
             <Button 

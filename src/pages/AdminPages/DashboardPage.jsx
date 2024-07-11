@@ -99,21 +99,21 @@ const DashboardPage = () => {
     setGrade(prevGrade => prevGrade === newGrade ? '' : newGrade);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const handleDifficultyChange = useCallback((newDifficulty) => {
     setDifficulty(prevDifficulty => prevDifficulty === newDifficulty ? '' : newDifficulty);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const handleSearch = useCallback((event) => {
     setSearchTerm(event.target.value);
     setPage(1);                   //  重置頁碼
     setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(-1);           //  關閉詳細信息列
+    setSelectedRow(null);           //  關閉詳細信息列
   }, []);
 
   const toggleDetails = useCallback((index) => {
@@ -126,15 +126,15 @@ const DashboardPage = () => {
   }, []);
 
   const handleDelete = useCallback((index) => {
-    setSelectedRow(-1);
+    setSelectedRow(null);
     setDeleteConfirmation(prevIndex => prevIndex === index ? null : index);
   }, []);
 
-  const confirmDelete = useCallback((index) => {
-    setData(prevData => prevData.filter((_, i) => i !== index));
+  const confirmDelete = useCallback((item) => {
+    setData(prevData => prevData.filter(dataItem => dataItem !== item));
     setDeleteConfirmation(null);
     setSelectedRow(null);
-    setSnackbarOpen(true);//顯示snacker
+    setSnackbarOpen(true);
   }, []);
 
   const handleSnackbarClose = useCallback(() => {
@@ -142,12 +142,13 @@ const DashboardPage = () => {
   }, []);
 
   const renderDetails = useCallback((item) => (
+    item && 
     <Box sx={{ margin: 1 }}>
       <Typography><strong>姓名:</strong> {item.name}</Typography>
       <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
       <Typography><strong>字庫:</strong> {item.details.wordBank}</Typography>
       <Typography><strong>難易度:</strong> {item.details.difficulty}</Typography>
-      <Typography><strong>题目數:</strong> {item.details.questionCount}</Typography>
+      <Typography><strong>題目數:</strong> {item.details.questionCount}</Typography>
       <Typography><strong>反饋模式:</strong> {item.details.feedbackMode}</Typography>
       <Typography><strong>詳細設置:</strong> {item.details.additionalSettings}</Typography>
     </Box>
@@ -268,7 +269,7 @@ const DashboardPage = () => {
                         <Collapse in={deleteConfirmation === index} timeout="auto" unmountOnExit>
                           <DeleteConfirmationRow
                             index={index}
-                            onConfirm={() => confirmDelete(index)}
+                            onConfirm={() => confirmDelete(item)}
                             onCancel={() => handleDelete(null)}
                           />
                         </Collapse>
@@ -299,6 +300,7 @@ const DashboardPage = () => {
             justifyContent: 'center' , 
             backgroundColor: '#f8f8f8', 
             zIndex: 999,
+            padding: '3px',
             borderBottomLeftRadius: '8px',
             borderBottomRightRadius: '8px'
           }}
