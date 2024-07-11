@@ -60,19 +60,31 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
     sendData();
   }, [resultInfo, basicInfo, modeInfo]);
 
+  
   const handleShare = async () => {
     if (tableRef.current) {
       try {
         const canvas = await html2canvas(tableRef.current);
-        const image = canvas.toDataURL("image/png");
-        
-        // 创建一个临时的a标签来下载图片
-        const link = document.createElement('a');
-        link.href = image;
-        link.download = 'table-screenshot.png';
-        link.click();
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const file = new File([blob], 'result.png', { type: 'image/png' });
+
+        if (navigator.share) {
+          await navigator.share({
+            title: '測驗結果',
+            text: '查看我的測驗結果！',
+            files: [file]
+          });
+        } else {
+          // 如果 Web Share API 不可用，回退到下載圖片
+          const image = canvas.toDataURL("image/png");
+          const link = document.createElement('a');
+          link.href = image;
+          link.download = 'result.png';
+          link.click();
+        }
       } catch (error) {
-        console.error('截图失败:', error);
+        console.error('分享失敗:', error);
+        alert('分享失敗，請稍後再試。');
       }
     }
   };
@@ -89,55 +101,6 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
   const calculateAccuracy = () => {
     const correctAnswers = rows.filter(row => row.userAnswer === row.correctAnswer).length;
     return (correctAnswers / rows.length * 100).toFixed(2);
-  };
-
-  const ImageDownload = ({ imageUrl, fileName }) => {
-    const [isDownloading, setIsDownloading] = useState(false);
-  
-    const handleDownload = async () => {
-      setIsDownloading(true);
-      try {
-        // Fetch the image as a blob
-        const response = await fetch(imageUrl);
-        if (!response.ok) throw new Error('Network response was not ok');
-        const blob = await response.blob();
-  
-        // Create a temporary URL for the blob
-        const url = window.URL.createObjectURL(blob);
-  
-        // Create a temporary anchor element
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = fileName || 'image.png';
-        link.style.display = 'none';
-        document.body.appendChild(link);
-  
-        // Programmatically click the link to trigger the download
-        link.click();
-  
-        // Clean up
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(link);
-  
-        console.log("Image download initiated successfully");
-      } catch (error) {
-        console.error("Error initiating image download:", error);
-        // Here you might want to show an error message to the user
-      } finally {
-        setIsDownloading(false);
-      }
-    };
-  
-    return (
-      <Button 
-        variant="contained" 
-        color="primary" 
-        onClick={handleDownload}
-        startIcon={<ShareIcon />}
-      >
-        分享
-      </Button>
-    );
   };
 
   return (
@@ -205,7 +168,14 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
         </Typography>
         <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 2 }}>
           <Grid item>
-            <ImageDownload imageUrl="https://cdn.britannica.com/79/232779-050-6B0411D7/German-Shepherd-dog-Alsatian.jpg" fileName="result.jpg" />
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleShare}
+            startIcon={<ShareIcon />}
+          >
+            分享
+          </Button>
           </Grid>
           <Grid item>
             <Button 
