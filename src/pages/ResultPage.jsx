@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Container, Typography, Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
+import html2canvas from 'html2canvas';
+import { Share } from 'lucide-react';
 
 const sharedContainerStyle = {
   width: '100%',
@@ -15,6 +17,7 @@ const sharedContainerStyle = {
 
 const ResultPage = ({ resultInfo, onComplete }) => {
   const [rows, setRows] = useState([]);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     const formattedRows = resultInfo.map((item, index) => ({
@@ -29,9 +32,21 @@ const ResultPage = ({ resultInfo, onComplete }) => {
     console.log("Result data loaded:", formattedRows);
   }, [resultInfo]);
 
-  const handleShare = () => {
-    console.log("Sharing results...");
-    // 實現分享邏輯
+  const handleShare = async () => {
+    if (tableRef.current) {
+      try {
+        const canvas = await html2canvas(tableRef.current);
+        const image = canvas.toDataURL("image/png");
+        
+        // 创建一个临时的a标签来下载图片
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = 'table-screenshot.png';
+        link.click();
+      } catch (error) {
+        console.error('截图失败:', error);
+      }
+    }
   };
 
   const handleConfirm = () => {
@@ -49,7 +64,7 @@ const ResultPage = ({ resultInfo, onComplete }) => {
   };
 
   return (
-    <Container maxWidth={false} style={sharedContainerStyle}>
+    <Container maxWidth={false} style={sharedContainerStyle} ref={tableRef}>
       <Box
         sx={{
           width: '100%',
