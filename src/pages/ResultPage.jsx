@@ -176,7 +176,7 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
           >
             分享
           </Button>
-          </Grid>
+          </Grid> 
           <Grid item>
             <Button 
               variant="contained" 
