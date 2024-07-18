@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
+import { CheckCircle, X } from 'lucide-react';
 
 const questions = [
   { text: '相同', tar: '同', ans: '正確' },
@@ -10,12 +11,14 @@ const questions = [
   { text: '日本好玩', tar: '目', ans: '錯誤' },
 ];
 
-const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
+const QuestionPage = ({ startCountdown, queIntervel, onComplete, isFeedbackImmediately }) => {
   const [step, setStep] = useState(0);
   const [countdown, setCountdown] = useState(startCountdown);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
+  const [feedback, setFeedback] = useState(null);
   const startTimeRef = useRef(null);
+  const [isWaiting, setIsWaiting] = useState(false);
 
   useEffect(() => {
     if (step === 0) {
@@ -35,30 +38,46 @@ const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
     if (step === 1) {
       const timer = setTimeout(() => {
         setStep(2);
-        startTimeRef.current = Date.now(); // 開始計時
+        startTimeRef.current = Date.now();
       }, queIntervel * 1000);
 
       return () => clearTimeout(timer);
     }
-  }, [step]);
+  }, [step, queIntervel]);
 
   const handleAnswer = (answer) => {
+    if (isWaiting) return; // Prevent multiple answers during feedback display
+
     const endTime = Date.now();
     const reactionTime = startTimeRef.current ? endTime - startTimeRef.current : null;
 
-    const newAnswers = [...answers, { 
+    const newAnswers = [...answers, {
       question: questions[questionIndex].text,
       target: questions[questionIndex].tar,
       userAnswer: answer,
       correctAnswer: questions[questionIndex].ans,
-      reactionTime: reactionTime // 添加反應時間
+      reactionTime: reactionTime
     }];
     setAnswers(newAnswers);
 
+    if (isFeedbackImmediately) {
+      setFeedback(answer === questions[questionIndex].ans ? 'correct' : 'incorrect');
+      setIsWaiting(true);
+      setTimeout(() => {
+        setFeedback(null);
+        setIsWaiting(false);
+        moveToNextQuestion(newAnswers);
+      }, 100);
+    } else {
+      moveToNextQuestion(newAnswers);
+    }
+  };
+
+  const moveToNextQuestion = (newAnswers) => {
     if (questionIndex < questions.length - 1) {
       setStep(1);
       setQuestionIndex(questionIndex + 1);
-      startTimeRef.current = null; // 重置計時器
+      startTimeRef.current = null;
     } else {
       onComplete(newAnswers);
     }
@@ -75,8 +94,26 @@ const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#E0E0E0',
+        position: 'relative', // Add this for absolute positioning context
       }}
     >
+      {feedback && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '45%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+          }}
+        >
+          {feedback === 'correct' ? (
+            <CheckCircle color="green" size={160} />
+          ) : (
+            <X color="red" size={160} />
+          )}
+        </Box>
+      )}
       {step === 0 ? (
         <Box
           sx={{
@@ -119,6 +156,7 @@ const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
                 color="secondary"
                 onClick={() => handleAnswer('錯誤')}
                 style={{ color: 'white' }}
+                disabled={isWaiting}
               >
                 錯誤
               </Button>
@@ -128,6 +166,7 @@ const QuestionPage = ({startCountdown, queIntervel, onComplete }) => {
                 variant="contained"
                 color="primary"
                 onClick={() => handleAnswer('正確')}
+                disabled={isWaiting}
               >
                 正確
               </Button>

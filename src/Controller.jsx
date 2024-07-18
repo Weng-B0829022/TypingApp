@@ -51,6 +51,7 @@ const Controller = () => {
           startCountdown={modeInfo?.startCountdown}
           queIntervel={modeInfo?.queIntervel}
           onComplete={handleQuestionComplete}
+          isFeedbackImmediately={modeInfo?.mode === '立即回饋'}
         />
       )}
       {currentPage === 3 && (
