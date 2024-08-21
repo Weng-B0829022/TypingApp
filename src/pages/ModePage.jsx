@@ -11,7 +11,10 @@ const ModePage = ({ onComplete }) => {
     number: '1',
     mode: '立即回饋',
     startCountdown: 1 , // 新增倒數計時秒數的預設值
-    queIntervel: 0.1 // 題目間隔的等待時間
+    queIntervel: 1 , // 題目間隔的等待時間
+    pronunciationType: '注音' ,
+    questionFormat: '是非題',  // 新增：題目格式（是非題/二選一選擇題）
+    answerTiming: '出題後答題',  
   });
 
   const [errors, setErrors] = useState({});
@@ -39,6 +42,9 @@ const ModePage = ({ onComplete }) => {
     if (!selected.mode) newErrors.mode = true;
     if (!selected.startCountdown) newErrors.startCountdown = true;
     if (!selected.queIntervel) newErrors.queIntervel = true;
+    if (!selected.questionFormat) newErrors.questionFormat = true;
+    if (!selected.answerTiming) newErrors.answerTiming = true;
+    if (!selected.pronunciationType) newErrors.pronunciationType = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -71,6 +77,85 @@ const ModePage = ({ onComplete }) => {
         padding: '20px',
       }}
     >
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          題目格式 {errors.questionFormat && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+        </Typography>
+        <Grid container spacing={1}>
+          {['是非題', '二選一選擇題'].map((format) => (
+            <Grid item xs={6} key={format}>
+              <Button
+                variant="contained"
+                color={selected.questionFormat === format ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('questionFormat', format)}
+                style={{ color: selected.questionFormat === format ? 'white' : 'black' }}
+                sx={{
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {format}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          答題時機 {errors.answerTiming && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+        </Typography>
+        <Grid container spacing={1}>
+          {['出題後答題', '出題時答題'].map((timing) => (
+            <Grid item xs={6} key={timing}>
+              <Button
+                variant="contained"
+                color={selected.answerTiming === timing ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('answerTiming', timing)}
+                style={{ color: selected.answerTiming === timing ? 'white' : 'black' }}
+                sx={{
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {timing}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          發音類型 {errors.pronunciationType && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+        </Typography>
+        <Grid container spacing={1}>
+          {['注音', '發音'].map((type) => (
+            <Grid item xs={6} key={type}>
+              <Button
+                variant="contained"
+                color={selected.pronunciationType === type ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('pronunciationType', type)}
+                style={{ color: selected.pronunciationType === type ? 'white' : 'black' }}
+                sx={{
+                  '&:focus': {
+                    outline: 'none',
+                    boxShadow: 'none',
+                  },
+                }}
+              >
+                {type}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
       <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           字庫 {errors.grade && <span style={{ color: 'red' , fontSize:'0.7em'}}>(必選)</span>}
