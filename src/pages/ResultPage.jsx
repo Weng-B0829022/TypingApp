@@ -1,6 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { Container, Typography, Box, Button, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Grid } from '@mui/material';
 import ShareIcon from '@mui/icons-material/Share';
+import html2canvas from 'html2canvas';
+import { Share } from 'lucide-react';
 
 const sharedContainerStyle = {
   width: '100%',
@@ -13,8 +15,9 @@ const sharedContainerStyle = {
   backgroundColor: '#E0E0E0',
 };
 
-const ResultPage = ({ resultInfo, onComplete }) => {
+const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
   const [rows, setRows] = useState([]);
+  const tableRef = useRef(null);
 
   useEffect(() => {
     const formattedRows = resultInfo.map((item, index) => ({
@@ -27,16 +30,68 @@ const ResultPage = ({ resultInfo, onComplete }) => {
     }));
     setRows(formattedRows);
     console.log("Result data loaded:", formattedRows);
-  }, [resultInfo]);
 
-  const handleShare = () => {
-    console.log("Sharing results...");
-    // 實現分享邏輯
+    // Send request to backend immediately when component mounts
+    const sendData = async () => {
+      try {
+        const response = await fetch('http://localhost:8080/submit', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            basicInfo,
+            modeInfo,
+            questionInfo: resultInfo,
+            resultInfo: formattedRows,
+          }),
+        });
+
+        if (response.ok) {
+          console.log('Data sent successfully');
+        } else {
+          console.error('Failed to send data');
+        }
+      } catch (error) {
+        console.error('Error sending request:', error);
+      }
+    };
+
+    sendData();
+  }, [resultInfo, basicInfo, modeInfo]);
+
+  
+  const handleShare = async () => {
+    if (tableRef.current) {
+      try {
+        const canvas = await html2canvas(tableRef.current);
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        const file = new File([blob], 'result.png', { type: 'image/png' });
+
+        if (navigator.share) {
+          await navigator.share({
+            title: '測驗結果',
+            text: '查看我的測驗結果！',
+            files: [file]
+          });
+        } else {
+          // 如果 Web Share API 不可用，回退到下載圖片
+          const image = canvas.toDataURL("image/png");
+          const link = document.createElement('a');
+          link.href = image;
+          link.download = 'result.png';
+          link.click();
+        }
+      } catch (error) {
+        console.error('分享失敗:', error);
+        alert('分享失敗，請稍後再試。');
+      }
+    }
   };
 
   const handleConfirm = () => {
     console.log("Results confirmed");
-    onComplete(rows);  // 傳遞完整的行數據
+    onComplete(rows);
   };
 
   const calculateTotalTime = () => {
@@ -49,7 +104,7 @@ const ResultPage = ({ resultInfo, onComplete }) => {
   };
 
   return (
-    <Container maxWidth={false} style={sharedContainerStyle}>
+    <Container maxWidth={false} style={sharedContainerStyle} ref={tableRef}>
       <Box
         sx={{
           width: '100%',
@@ -113,15 +168,15 @@ const ResultPage = ({ resultInfo, onComplete }) => {
         </Typography>
         <Grid container spacing={2} justifyContent="space-between" sx={{ marginTop: 2 }}>
           <Grid item>
-            <Button 
-              variant="contained" 
-              color="primary" 
-              onClick={handleShare}
-              startIcon={<ShareIcon />}
-            >
-              分享
-            </Button>
-          </Grid>
+          <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={handleShare}
+            startIcon={<ShareIcon />}
+          >
+            分享
+          </Button>
+          </Grid> 
           <Grid item>
             <Button 
               variant="contained" 

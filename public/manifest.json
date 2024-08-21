@@ -1,5 +1,5 @@
 {
-    "name": "typingApp",
+    "name": "TypingApp",
     "short_name": "TA",
     "start_url": "/",
     "display": "standalone",
@@ -7,9 +7,9 @@
     "theme_color": "#000000",
     "icons": [
       {
-        "src": "/icon-192x192.png",
-        "sizes": "192x192",
-        "type": "./icon.webp"
+        "src": "/icon3.png",
+        "sizes": "128x128",
+        "type": "./icon2.webp"
       }
     ]
   }

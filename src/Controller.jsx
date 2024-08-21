@@ -39,7 +39,7 @@ const Controller = () => {
     nextPage();
   };
 
-  const handleQuestionComplete = async (data) => {
+  const handleQuestionComplete = (data) => {
     setQuestionInfo(data);
     console.log("測驗完成，所有答案：\n", basicInfo, modeInfo, data, resultInfo);
 
@@ -73,7 +73,7 @@ const Controller = () => {
   const handleResultComplete = (data) => {
     setResultInfo(data);
     nextPage();
-    // 這裡可以添加完成所有關卡後的邏輯
+    // Add logic for after completing all stages here
   };
 
   const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
@@ -103,7 +103,14 @@ const Controller = () => {
           />
         )
       )}
-      {currentPage === 3 && <ResultPage resultInfo={questionInfo} onComplete={handleResultComplete} />}
+      {currentPage === 3 && (
+        <ResultPage 
+          resultInfo={questionInfo} 
+          basicInfo={basicInfo}
+          modeInfo={modeInfo}
+          onComplete={handleResultComplete} 
+        />
+      )}
     </div>
   );
 };
