@@ -44,7 +44,7 @@ const Controller = () => {
     console.log("測驗完成，所有答案：\n", basicInfo, modeInfo, data, resultInfo);
 
     // 發送請求到後端
-    try {
+    /*try {
       const response = await fetch('http://localhost:8080/submit', {
         method: 'POST',
         headers: {
@@ -65,7 +65,7 @@ const Controller = () => {
       }
     } catch (error) {
       console.error('發送請求時出錯:', error);
-    }
+    }*/
 
     nextPage();
   };
@@ -92,6 +92,7 @@ const Controller = () => {
             answerTiming={modeInfo.answerTiming}
             pronunciationType={modeInfo.pronunciationType}
             onComplete={handleQuestionComplete}
+            isFeedbackImmediately={false}
           />
         ) : (
           <MultipleChoiceQuestionPage
@@ -100,6 +101,7 @@ const Controller = () => {
             answerTiming={modeInfo.answerTiming}
             pronunciationType={modeInfo.pronunciationType}
             onComplete={handleQuestionComplete}
+            isFeedbackImmediately={true}
           />
         )
       )}

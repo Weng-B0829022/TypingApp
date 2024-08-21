@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
+import { CheckCircle, X } from 'lucide-react';
 
 const questions = [
     { text: '月亮', tar: '亮', ans: '正確', zhuyin: 'ㄌㄧㄤˋ', display: '月' },
@@ -10,84 +11,98 @@ const questions = [
     { text: '日本好玩', tar: '日', ans: '錯誤', zhuyin: 'ㄖˋ', display: '目' },
 ];
 
-const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete }) => {
-const [step, setStep] = useState(0);
-const [countdown, setCountdown] = useState(startCountdown);
-const [questionIndex, setQuestionIndex] = useState(0);
-const [answers, setAnswers] = useState([]);
-const [showOptions, setShowOptions] = useState(false);
-const startTimeRef = useRef(null);
+const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately }) => {
+  const [step, setStep] = useState(0);
+  const [countdown, setCountdown] = useState(startCountdown);
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [answers, setAnswers] = useState([]);
+  const [showOptions, setShowOptions] = useState(false);
+  const [feedback, setFeedback] = useState(null);
+  const startTimeRef = useRef(null);
 
-useEffect(() => {
+  useEffect(() => {
     if (step === 0) {
-    const timer = setInterval(() => {
+      const timer = setInterval(() => {
         setCountdown((prev) => {
-        if (prev === 1) {
+          if (prev === 1) {
             clearInterval(timer);
             setStep(1);
             return prev;
-        }
-        return prev - 1;
+          }
+          return prev - 1;
         });
-    }, 1000);
-    return () => clearInterval(timer);
+      }, 1000);
+      return () => clearInterval(timer);
     }
 
     if (step === 1) {
-    const timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         setStep(2);
         startTimeRef.current = Date.now();
         if (answerTiming === '出題時答題') {
-        setShowOptions(true);
+          setShowOptions(true);
         }
-    }, queIntervel * 1000);
-    return () => clearTimeout(timer);
+      }, queIntervel * 1000);
+      return () => clearTimeout(timer);
     }
 
     if (step === 2 && answerTiming === '出題後答題') {
-    const timer = setTimeout(() => {
+      const timer = setTimeout(() => {
         setShowOptions(true);
-    }, queIntervel * 1000);
-    return () => clearTimeout(timer);
+      }, queIntervel * 1000);
+      return () => clearTimeout(timer);
     }
-}, [step, answerTiming, queIntervel]);
+  }, [step, answerTiming, queIntervel]);
 
-const handleAnswer = (answer) => {
+  const handleAnswer = (answer) => {
     const endTime = Date.now();
     const reactionTime = startTimeRef.current ? endTime - startTimeRef.current : null;
 
+    const isCorrect = answer === questions[questionIndex].ans;
     const newAnswers = [...answers, { 
-    question: questions[questionIndex].text,
-    target: questions[questionIndex].tar,
-    userAnswer: answer,
-    correctAnswer: questions[questionIndex].ans,
-    reactionTime: reactionTime
+      question: questions[questionIndex].text,
+      target: questions[questionIndex].tar,
+      userAnswer: answer,
+      correctAnswer: questions[questionIndex].ans,
+      reactionTime: reactionTime
     }];
     setAnswers(newAnswers);
 
-    if (questionIndex < questions.length - 1) {
-    setStep(1);
-    setQuestionIndex(questionIndex + 1);
-    setShowOptions(false);
-    startTimeRef.current = null;
+    if (isFeedbackImmediately) {
+      setFeedback(isCorrect ? 'correct' : 'incorrect');
+      setTimeout(() => {
+        setFeedback(null);
+        moveToNextQuestion(newAnswers);
+      }, 1000);
     } else {
-    onComplete(newAnswers);
+      moveToNextQuestion(newAnswers);
     }
-};
+  };
 
-const renderQuestion = () => {
+  const moveToNextQuestion = (newAnswers) => {
+    if (questionIndex < questions.length - 1) {
+      setStep(1);
+      setQuestionIndex(questionIndex + 1);
+      setShowOptions(false);
+      startTimeRef.current = null;
+    } else {
+      onComplete(newAnswers);
+    }
+  };
+
+  const renderQuestion = () => {
     const question = questions[questionIndex];
     if (pronunciationType === '注音') {
-    return question.text.replace(question.tar, question.zhuyin);
+      return question.text.replace(question.tar, question.zhuyin);
     } else {
-    return question.text;
+      return question.text;
     }
-};
+  };
 
-return (
+  return (
     <Container
-    maxWidth="sm"
-    style={{
+      maxWidth="sm"
+      style={{
         minWidth: 'min(100vw, 600px)',
         height: '100vh',
         display: 'flex',
@@ -95,50 +110,68 @@ return (
         justifyContent: 'center',
         alignItems: 'center',
         backgroundColor: '#E0E0E0',
-    }}
+        position: 'relative',
+      }}
     >
-    {step === 0 && (
-        <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
-        <Typography variant="h4">倒數 {countdown}</Typography>
+      {feedback && (
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '45%',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 1000,
+          }}
+        >
+          {feedback === 'correct' ? (
+            <CheckCircle color="green" size={160} />
+          ) : (
+            <X color="red" size={160} />
+          )}
         </Box>
-    )}
-    {step === 1 && (
+      )}
+      {step === 0 && (
         <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
-        <Typography variant="h4">{renderQuestion()}</Typography>
+          <Typography variant="h4">倒數 {countdown}</Typography>
         </Box>
-    )}
-    {step === 2 && (
+      )}
+      {step === 1 && (
         <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
-        {(!showOptions || answerTiming === '出題時答題') && (
+          <Typography variant="h4">{renderQuestion()}</Typography>
+        </Box>
+      )}
+      {step === 2 && (
+        <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
+          {(!showOptions || answerTiming === '出題時答題') && (
             <Typography variant="h4">
-            {questions[questionIndex].display}
+              {questions[questionIndex].display}
             </Typography>
-        )}
-        {showOptions && (
+          )}
+          {showOptions && (
             <>
-            {answerTiming === '出題後答題' && (
+              {answerTiming === '出題後答題' && (
                 <Typography variant="h4">
-                
+                  ?
                 </Typography>
-            )}
-            <Grid container spacing={2} justifyContent="center" mt={2}>
+              )}
+              <Grid container spacing={2} justifyContent="center" mt={2}>
                 <Grid item>
-                <Button variant="contained" color="secondary" onClick={() => handleAnswer('錯誤')} style={{ color: 'white' }}>
-                    錯誤
-                </Button>
+                  <Button variant="contained" color="secondary" onClick={() => handleAnswer('錯誤')} style={{ color: 'white' }}>
+                    否
+                  </Button>
                 </Grid>
                 <Grid item>
-                <Button variant="contained" color="primary" onClick={() => handleAnswer('正確')}>
-                    正確
-                </Button>
+                  <Button variant="contained" color="primary" onClick={() => handleAnswer('正確')}>
+                    是
+                  </Button>
                 </Grid>
-            </Grid>
+              </Grid>
             </>
-        )}
+          )}
         </Box>
-    )}
+      )}
     </Container>
-);
+  );
 };
 
 export default TrueFalseQuestionPage;
