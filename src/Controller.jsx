@@ -18,7 +18,8 @@ const Controller = () => {
     queIntervel: 1,
     questionFormat: '',  // 新增：題目格式（是非題/二選一選擇題）
     answerTiming: '',    // 新增：答題時機（出題後答題/出題時答題）
-    pronunciationType: '' // 新增：發音類型（注音/發音）
+    pronunciationType: '', // 新增：發音類型（注音/發音）
+    isRetryIncorrect: '否',
   });
   const [questionInfo, setQuestionInfo] = useState(null);
   const [resultInfo, setResultInfo] = useState(null);
@@ -92,7 +93,8 @@ const Controller = () => {
             answerTiming={modeInfo.answerTiming}
             pronunciationType={modeInfo.pronunciationType}
             onComplete={handleQuestionComplete}
-            isFeedbackImmediately={false}
+            isFeedbackImmediately={modeInfo.mode === '立即回饋'}
+            isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
           />
         ) : (
           <MultipleChoiceQuestionPage
@@ -101,7 +103,8 @@ const Controller = () => {
             answerTiming={modeInfo.answerTiming}
             pronunciationType={modeInfo.pronunciationType}
             onComplete={handleQuestionComplete}
-            isFeedbackImmediately={true}
+            isFeedbackImmediately={modeInfo.mode === '立即回饋'}
+            isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
           />
         )
       )}

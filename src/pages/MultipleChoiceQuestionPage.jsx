@@ -66,6 +66,12 @@ const MultipleChoiceQuestionPage = ({ startCountdown, queIntervel, answerTiming,
 
     if (isFeedbackImmediately) {
       setFeedback(isCorrect ? 'correct' : 'incorrect');
+
+      if (!isCorrect && isRetryIncorrect) {
+        // 如果答錯，將當前問題添加到問題列表的末尾
+        setQuestions([...questions, currentQuestion]);
+      }
+
       setTimeout(() => {
         setFeedback(null);
         moveToNextQuestion(newAnswers);

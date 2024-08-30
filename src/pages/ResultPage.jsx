@@ -24,6 +24,7 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
       row: index + 1,
       question: item.question,
       target: item.target,
+      display: item.display,
       correctAnswer: item.correctAnswer,
       userAnswer: item.userAnswer,
       reactionTime: item.reactionTime
@@ -119,12 +120,13 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
           <Table aria-label="result table" size="small">
             <TableHead>
               <TableRow>
-                <TableCell>題號</TableCell>
-                <TableCell align="right">題目</TableCell>
-                <TableCell align="right">目標字</TableCell>
-                <TableCell align="right">正確答案</TableCell>
-                <TableCell align="right">作答情況</TableCell>
-                <TableCell align="right">反應時間(ms)</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">題號</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">題目</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">目標字</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">畫面顯示</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">正確答案</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">作答情況</TableCell>
+                <TableCell sx={{ padding: '0px'}} align="right">反應時間(ms)</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -133,11 +135,12 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
                   key={row.row}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
-                  <TableCell component="th" scope="row">{row.row}</TableCell>
-                  <TableCell align="right">{row.question}</TableCell>
-                  <TableCell align="right">{row.target}</TableCell>
-                  <TableCell align="right">{row.correctAnswer}</TableCell>
-                  <TableCell align="right">
+                  <TableCell sx={{ padding: '0px'}} align="right" component="th" scope="row">{row.row}</TableCell>
+                  <TableCell sx={{ padding: '0px'}} align="right">{row.question}</TableCell>
+                  <TableCell sx={{ padding: '0px'}} align="right">{row.target}</TableCell>
+                  <TableCell sx={{ padding: '0px'}} align="right">{row.display}</TableCell>
+                  <TableCell sx={{ padding: '0px'}} align="right">{row.correctAnswer}</TableCell>
+                  <TableCell sx={{ padding: '0px'}} align="right">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
                       {row.userAnswer}
                       {' ('}

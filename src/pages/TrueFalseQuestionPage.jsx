@@ -2,22 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
 
-const questions = [
-    { text: '月亮', tar: '亮', ans: '正確', zhuyin: 'ㄌㄧㄤˋ', display: '月' },
-    { text: '你好', tar: '你', ans: '錯誤', zhuyin: 'ㄋㄧˇ', display: '尔' },
-    { text: '微風', tar: '微', ans: '正確', zhuyin: 'ㄨㄟˊ', display: '微' },
-    { text: '相同', tar: '同', ans: '正確', zhuyin: 'ㄊㄨㄥˊ', display: '同' },
-    { text: '火車', tar: '火', ans: '錯誤', zhuyin: 'ㄏㄨㄛˇ', display: '人' },
-    { text: '日本好玩', tar: '日', ans: '錯誤', zhuyin: 'ㄖˋ', display: '目' },
+var questions = [
+    { text: '月亮', tar: '亮', ans: '正確', zhuyin: 'ㄌㄧㄤˋ', display: '亮' },
+    //{ text: '你好', tar: '你', ans: '錯誤', zhuyin: 'ㄋㄧˇ', display: '尔' },
+    //{ text: '微風', tar: '微', ans: '正確', zhuyin: 'ㄨㄟˊ', display: '微' },
+    //{ text: '相同', tar: '同', ans: '正確', zhuyin: 'ㄊㄨㄥˊ', display: '同' },
+    //{ text: '火車', tar: '火', ans: '錯誤', zhuyin: 'ㄏㄨㄛˇ', display: '人' },
+    //{ text: '日本好玩', tar: '日', ans: '錯誤', zhuyin: 'ㄖˋ', display: '目' },
 ];
 
-const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately }) => {
+const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
   const [step, setStep] = useState(0);
   const [countdown, setCountdown] = useState(startCountdown);
   const [questionIndex, setQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState([]);
-  const [showOptions, setShowOptions] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [showOptions, setShowOptions] = useState(false);
   const startTimeRef = useRef(null);
 
   useEffect(() => {
@@ -62,6 +62,7 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
     const newAnswers = [...answers, { 
       question: questions[questionIndex].text,
       target: questions[questionIndex].tar,
+      display: questions[questionIndex].display,
       userAnswer: answer,
       correctAnswer: questions[questionIndex].ans,
       reactionTime: reactionTime
@@ -70,7 +71,14 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
 
     if (isFeedbackImmediately) {
       setFeedback(isCorrect ? 'correct' : 'incorrect');
+
+      if (!isCorrect && isRetryIncorrect) {
+        // 如果答錯，將當前問題添加到問題列表的末尾
+        questions = [...questions, questions[questionIndex]];
+      }
+
       setTimeout(() => {
+        console.log('setFeedback(null)')
         setFeedback(null);
         moveToNextQuestion(newAnswers);
       }, 1000);
@@ -140,7 +148,7 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
           <Typography variant="h4">{renderQuestion()}</Typography>
         </Box>
       )}
-      {step === 2 && (
+      {step >= 2 && (
         <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
           {(!showOptions || answerTiming === '出題時答題') && (
             <Typography variant="h4">

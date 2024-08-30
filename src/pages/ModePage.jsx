@@ -15,6 +15,7 @@ const ModePage = ({ onComplete }) => {
     pronunciationType: '注音' ,
     questionFormat: '是非題',  // 新增：題目格式（是非題/二選一選擇題）
     answerTiming: '出題後答題',  
+    isRetryIncorrect: '否',
   });
 
   const [errors, setErrors] = useState({});
@@ -45,6 +46,7 @@ const ModePage = ({ onComplete }) => {
     if (!selected.questionFormat) newErrors.questionFormat = true;
     if (!selected.answerTiming) newErrors.answerTiming = true;
     if (!selected.pronunciationType) newErrors.pronunciationType = true;
+    if (selected.mode === '立即回饋' && !selected.isRetryIncorrect) newErrors.isRetryIncorrect = true;
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -55,7 +57,7 @@ const ModePage = ({ onComplete }) => {
   };
 
   const boxStyle = {
-    width: '100%', 
+    width: '80%', 
     mb: 2, 
     backgroundColor: '#E0E0E0', 
     padding: 2, 
@@ -263,7 +265,34 @@ const ModePage = ({ onComplete }) => {
           ))}
         </Grid>
       </Box>
-
+      {selected.mode === '立即回饋' && (
+        <Box sx={boxStyle}>
+          <Typography variant="h6" align="center" gutterBottom>
+            答錯的題目是否重新加入 {errors.isRetryIncorrect && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+          </Typography>
+          <Grid container spacing={1}>
+            {['是', '否'].map((option) => (
+              <Grid item xs={6} key={option}>
+                <Button
+                  variant="contained"
+                  color={selected.isRetryIncorrect === option ? 'primary' : 'white'}
+                  fullWidth
+                  onClick={() => handleButtonClick('isRetryIncorrect', option)}
+                  style={{ color: selected.isRetryIncorrect === option ? 'white' : 'black' }}
+                  sx={{
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  {option}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
       <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
           詳細設置
