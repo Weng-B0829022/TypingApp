@@ -11,7 +11,7 @@ const questions = [
     { text: '日本好玩', tar: '日', options: ['日', '目'], ans: '日', zhuyin: 'ㄖˋ' },
 ];
 
-const MultipleChoiceQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately }) => {
+const MultipleChoiceQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
   const [step, setStep] = useState(0);
   const [countdown, setCountdown] = useState(startCountdown);
   const [questionIndex, setQuestionIndex] = useState(0);
