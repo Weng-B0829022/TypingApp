@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
-
+import photo from '../assets/好_代1.png';
 var questions = [
-    { text: '月亮', tar: '亮', ans: '正確', zhuyin: 'ㄌㄧㄤˋ', display: '亮' },
-    { text: '你好', tar: '你', ans: '錯誤', zhuyin: 'ㄋㄧˇ', display: '尔' },
+    { text: '你好', tar: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: {photo} },
+    { text: '你好', tar: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: '好' },
     { text: '微風', tar: '微', ans: '正確', zhuyin: 'ㄨㄟˊ', display: '微' },
     { text: '相同', tar: '同', ans: '正確', zhuyin: 'ㄊㄨㄥˊ', display: '同' },
     { text: '火車', tar: '火', ans: '錯誤', zhuyin: 'ㄏㄨㄛˇ', display: '人' },
@@ -107,6 +107,16 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
     }
   };
 
+  const renderDisplay = (display) => {
+    if (typeof display === 'string') {
+      return <Typography variant="h4" style={{ fontFamily: '標楷體', color: '#000000' }}>{display}</Typography>;
+    } else if (typeof display === 'object' && display.photo) {
+      return <img src={display.photo} alt="Question" style={{ maxWidth: '1.8em', maxHeight: '1.8em' }} />
+    } else {
+      return <Typography variant="h4">?</Typography>;
+    }
+  };
+
   return (
     <Container
       maxWidth="sm"
@@ -151,16 +161,12 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
       {step >= 2 && (
         <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
           {(!showOptions || answerTiming === '出題時答題') && (
-            <Typography variant="h4">
-              {questions[questionIndex].display}
-            </Typography>
+            renderDisplay(questions[questionIndex].display)
           )}
           {showOptions && (
             <>
               {answerTiming === '出題後答題' && (
-                <Typography variant="h4">
-                  ?
-                </Typography>
+                renderDisplay(questions[questionIndex].display)
               )}
               <Grid container spacing={2} justifyContent="center" mt={2}>
                 <Grid item>
