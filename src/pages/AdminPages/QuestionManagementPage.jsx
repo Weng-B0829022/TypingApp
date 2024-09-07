@@ -22,6 +22,15 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@mui/material/styles';
 import DeleteConfirmationRow from './components/DeleteConfirmationRow';
 import styles from './styles/QuestionManagementPage_styles';
+{/* <Typography><strong>字:</strong> {item.character}</Typography>
+<Typography><strong>部首:</strong> {item.radical}</Typography>
+<Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
+<Typography><strong>字頻:</strong> {item.character_frequency}</Typography>
+<Typography><strong>詞頻1:</strong> {item.word_frequency}</Typography>
+<Typography><strong>詞:</strong> {item.word}</Typography>
+<Typography><strong>年級:</strong> {item.grade}</Typography>
+<Typography><strong>變種數:</strong> {item.variant_num}</Typography>
+<Typography><strong>詞頻2:</strong> {item.words_frequency}</Typography> */}
 
 // 模擬數據
 const initialData = [
