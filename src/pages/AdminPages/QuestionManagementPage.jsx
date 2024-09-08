@@ -22,6 +22,8 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@mui/material/styles';
 import DeleteConfirmationRow from './components/DeleteConfirmationRow';
 import styles from './styles/QuestionManagementPage_styles';
+import useApi from '../../api/useApi';
+import { QueryClient, QueryClientProvider } from 'react-query'
 {/* <Typography><strong>字:</strong> {item.character}</Typography>
 <Typography><strong>部首:</strong> {item.radical}</Typography>
 <Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
@@ -44,36 +46,12 @@ const initialData = [
       feedbackMode: '立即反饋',
       additionalSettings: '倒計時: 30秒'
     }
-  },
-  {
-    name: '好',
-    researchCode: '6',
-    details: {
-      wordBank: '二年級',
-      difficulty: '中等',
-      questionCount: 15,
-      feedbackMode: '答題後反饋',
-      additionalSettings: '允許跳過: 是'
-    }
-  },
-  // 為了演示滾動效果，添加更多數據
-  ...Array(10000).fill().map((_, i) => ({
-    name: `字詞 ${i + 3}`,
-    researchCode: `${i+3}`,
-    details: {
-      wordBank: '三年級',
-      difficulty: '困難',
-      questionCount: 20,
-      feedbackMode: '混合模式',
-      additionalSettings: '時間限制: 45分鐘'
-    }
-  }))
+  }
 ];
-
+const queryClient = new QueryClient()
 const ITEMS_PER_PAGE = 50; // 每页显示的项目数
 
 const QuestionManagementPage = () => {
-  const [data, setData] = useState(initialData);
   const [selectedRow, setSelectedRow] = useState(null);
   const theme = useTheme();
   const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
@@ -84,13 +62,15 @@ const QuestionManagementPage = () => {
   const [page, setPage] = useState(1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const {data, isLoading, error} = useApi('/api/questions');
 
   const filteredData = useMemo(() => {
+    console.log('data', typeof(data));
     return data.filter(item => 
-      (item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.researchCode.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      (grade ? item.details.wordBank === grade : true) &&
-      (difficulty ? item.details.difficulty === difficulty : true)
+      (item.character.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.word.toLowerCase().includes(searchTerm.toLowerCase())) 
+      //(grade ? item.details.wordBank === grade : true) &&
+      //(difficulty ? item.details.difficulty === difficulty : true)
     );
   }, [searchTerm, grade, difficulty, data]);
 
@@ -167,6 +147,7 @@ const QuestionManagementPage = () => {
   }, [filteredData, page]);
 
   return (
+    <QueryClientProvider client={queryClient}>
     <div style={isMediumScreen ? isSmallScreen ? {} : {display:'flex'} : styles.container}>
       <div style={styles.mainContent}>
         {/* 搜索区块 */}
@@ -324,6 +305,7 @@ const QuestionManagementPage = () => {
         </Alert>
       </Snackbar>
     </div>
+    </QueryClientProvider>
   );
 };
 
