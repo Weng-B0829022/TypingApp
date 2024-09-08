@@ -23,7 +23,7 @@ import { useTheme } from '@mui/material/styles';
 import DeleteConfirmationRow from './components/DeleteConfirmationRow';
 import styles from './styles/QuestionManagementPage_styles';
 import useApi from '../../api/useApi';
-import { QueryClient, QueryClientProvider } from 'react-query'
+
 {/* <Typography><strong>字:</strong> {item.character}</Typography>
 <Typography><strong>部首:</strong> {item.radical}</Typography>
 <Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
@@ -48,7 +48,7 @@ const initialData = [
     }
   }
 ];
-const queryClient = new QueryClient()
+
 const ITEMS_PER_PAGE = 50; // 每页显示的项目数
 
 const QuestionManagementPage = () => {
@@ -62,17 +62,18 @@ const QuestionManagementPage = () => {
   const [page, setPage] = useState(1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const {data, isLoading, error} = useApi('/api/questions');
+  const {data, isLoading, error} = useApi('api/characters');
 
   const filteredData = useMemo(() => {
-    console.log('data', typeof(data));
+    if (!data || isLoading) return [];
+    
     return data.filter(item => 
-      (item.character.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.word.toLowerCase().includes(searchTerm.toLowerCase())) 
-      //(grade ? item.details.wordBank === grade : true) &&
-      //(difficulty ? item.details.difficulty === difficulty : true)
+      (item.character?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      item.word?.toLowerCase().includes(searchTerm.toLowerCase())) 
+      // (grade ? item.grade === grade : true) &&
+      // (difficulty ? item.difficulty === difficulty : true)
     );
-  }, [searchTerm, grade, difficulty, data]);
+  }, [searchTerm, grade, difficulty, data, isLoading]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
@@ -129,13 +130,15 @@ const QuestionManagementPage = () => {
   const renderDetails = useCallback((item) => (
     item &&
     <Box sx={{ margin: 1 }}>
-      <Typography><strong>姓名:</strong> {item.name}</Typography>
-      <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
-      <Typography><strong>字庫:</strong> {item.details.wordBank}</Typography>
-      <Typography><strong>難易度:</strong> {item.details.difficulty}</Typography>
-      <Typography><strong>题目數:</strong> {item.details.questionCount}</Typography>
-      <Typography><strong>反饋模式:</strong> {item.details.feedbackMode}</Typography>
-      <Typography><strong>詳細設置:</strong> {item.details.additionalSettings}</Typography>
+      <Typography><strong>字:</strong> {item.character}</Typography>
+      <Typography><strong>部首:</strong> {item.radical}</Typography>
+      <Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
+      <Typography><strong>字頻:</strong> {item.character_frequency}</Typography>
+      <Typography><strong>詞頻1:</strong> {item.word_frequency}</Typography>
+      <Typography><strong>詞:</strong> {item.word}</Typography>
+      <Typography><strong>年級:</strong> {item.grade}</Typography>
+      <Typography><strong>變種數:</strong> {item.variant_num}</Typography>
+      <Typography><strong>詞頻2:</strong> {item.words_frequency}</Typography>
     </Box>
   ), []);
 
@@ -147,7 +150,6 @@ const QuestionManagementPage = () => {
   }, [filteredData, page]);
 
   return (
-    <QueryClientProvider client={queryClient}>
     <div style={isMediumScreen ? isSmallScreen ? {} : {display:'flex'} : styles.container}>
       <div style={styles.mainContent}>
         {/* 搜索区块 */}
@@ -204,19 +206,27 @@ const QuestionManagementPage = () => {
           <Table stickyHeader aria-label="sticky table">
             <TableHead>
               <TableRow>
-                <TableCell>姓名</TableCell>
+                <TableCell>字</TableCell>
+                <TableCell>部首</TableCell>
+                <TableCell>筆劃</TableCell>
+                <TableCell>字頻</TableCell>
+                <TableCell>詞頻1</TableCell>
+                <TableCell>詞</TableCell>
+                <TableCell>年級</TableCell>
                 <TableCell>變種數</TableCell>
+                <TableCell>詞頻2</TableCell>
                 <TableCell>操作</TableCell>
               </TableRow>
             </TableHead>
-            <TableBody>
-              {paginatedData.map((item, index) => (
+            {isLoading && <div>Loading...</div>}
+            {data && <TableBody>
+              {data.map((item, index) => (
                 <React.Fragment key={index}>
                   <TableRow 
                     style={selectedRow === index ? styles.selectedRow : {}}
                   >
-                    <TableCell sx={{borderBottom: 'none'}}>{item.name}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.researchCode}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.character}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.radical}</TableCell>
                     <TableCell sx={{borderBottom: 'none'}}
                     >
                       <Button 
@@ -267,7 +277,7 @@ const QuestionManagementPage = () => {
                   )}
                 </React.Fragment>
               ))}
-            </TableBody>
+            </TableBody>}
           </Table>
         </TableContainer>
         <Pagination
@@ -305,7 +315,6 @@ const QuestionManagementPage = () => {
         </Alert>
       </Snackbar>
     </div>
-    </QueryClientProvider>
   );
 };
 

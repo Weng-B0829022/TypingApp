@@ -24,8 +24,10 @@ import {
   Dashboard as DashboardIcon,
   LibraryAdd as LibraryAddIcon
 } from '@mui/icons-material';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
 const drawerWidth = 240;
+const queryClient = new QueryClient();
 
 const AdminPage = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -226,10 +228,12 @@ const AdminPage = () => {
         component="main"
         sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`} ,backgroundColor: '#bbbbbb'}}
       >
-        <Container maxWidth="lg" sx={{ mt: 8, mb: 0 , width:'100%', }}>
-          {currentPage === 'dashboard' && <DashboardPage />}
-          {currentPage === 'questions' && <QuestionManagementPage />}
-        </Container>
+        <QueryClientProvider client={queryClient}>
+          <Container maxWidth="lg" sx={{ mt: 8, mb: 0 , width:'100%', }}>
+            {currentPage === 'dashboard' && <DashboardPage />}
+            {currentPage === 'questions' && <QuestionManagementPage />}
+          </Container>
+        </QueryClientProvider>
       </Box>
     </Box>
   );
