@@ -5,7 +5,10 @@ import ResultPage from './pages/ResultPage';
 import AdminPage from './pages/AdminPage';
 import TrueFalseQuestionPage from './pages/TrueFalseQuestionPage';
 import MultipleChoiceQuestionPage from './pages/MultipleChoiceQuestionPage';
+import { QueryClient, QueryClientProvider } from 'react-query';
 
+
+const queryClient = new QueryClient();
 const Controller = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [basicInfo, setBasicInfo] = useState(null);
@@ -80,43 +83,45 @@ const Controller = () => {
   const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
-      {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
-      {currentPage === 1 && (
-        isAdmin ? <AdminPage /> : <ModePage onComplete={handleModeComplete} />
-      )}
-      {currentPage === 2 && (
-        modeInfo.questionFormat === '是非題' ? (
-          <TrueFalseQuestionPage
-            startCountdown={modeInfo.startCountdown}
-            queIntervel={modeInfo.queIntervel}
-            answerTiming={modeInfo.answerTiming}
-            pronunciationType={modeInfo.pronunciationType}
-            onComplete={handleQuestionComplete}
-            isFeedbackImmediately={modeInfo.mode === '立即回饋'}
-            isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
+    <QueryClientProvider client={queryClient}>
+      <div style={{ width: '100vw', height: '100vh' }}>
+        {currentPage === 0 && <BasicInfo onComplete={handleBasicInfoComplete} />}
+        {currentPage === 1 && (
+          isAdmin ? <AdminPage /> : <ModePage onComplete={handleModeComplete} />
+        )}
+        {currentPage === 2 && (
+          modeInfo.questionFormat === '是非題' ? (
+            <TrueFalseQuestionPage
+              startCountdown={modeInfo.startCountdown}
+              queIntervel={modeInfo.queIntervel}
+              answerTiming={modeInfo.answerTiming}
+              pronunciationType={modeInfo.pronunciationType}
+              onComplete={handleQuestionComplete}
+              isFeedbackImmediately={modeInfo.mode === '立即回饋'}
+              isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
+            />
+          ) : (
+            <MultipleChoiceQuestionPage
+              startCountdown={modeInfo.startCountdown}
+              queIntervel={modeInfo.queIntervel}
+              answerTiming={modeInfo.answerTiming}
+              pronunciationType={modeInfo.pronunciationType}
+              onComplete={handleQuestionComplete}
+              isFeedbackImmediately={modeInfo.mode === '立即回饋'}
+              isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
+            />
+          )
+        )}
+        {currentPage === 3 && (
+          <ResultPage 
+            resultInfo={questionInfo} 
+            basicInfo={basicInfo}
+            modeInfo={modeInfo}
+            onComplete={handleResultComplete} 
           />
-        ) : (
-          <MultipleChoiceQuestionPage
-            startCountdown={modeInfo.startCountdown}
-            queIntervel={modeInfo.queIntervel}
-            answerTiming={modeInfo.answerTiming}
-            pronunciationType={modeInfo.pronunciationType}
-            onComplete={handleQuestionComplete}
-            isFeedbackImmediately={modeInfo.mode === '立即回饋'}
-            isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
-          />
-        )
-      )}
-      {currentPage === 3 && (
-        <ResultPage 
-          resultInfo={questionInfo} 
-          basicInfo={basicInfo}
-          modeInfo={modeInfo}
-          onComplete={handleResultComplete} 
-        />
-      )}
-    </div>
+        )}
+      </div>
+    </QueryClientProvider>
   );
 };
 

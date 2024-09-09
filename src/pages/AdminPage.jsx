@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import QuestionManagementPage from './AdminPages/QuestionManagementPage';
 import DashboardPage from './AdminPages/DashboardPage';
+import useApi from '../api/useApi';
 import { 
   Box, 
   Drawer,
@@ -27,9 +28,11 @@ import {
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 const drawerWidth = 240;
-const queryClient = new QueryClient();
 
 const AdminPage = () => {
+  const isFirstRender = useRef(true);
+  const { data, isCharacterLoading, errorCharacter, refetch } = useApi('api/characters', { enabled: false });
+
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('dashboard');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -37,6 +40,13 @@ const AdminPage = () => {
   const [password, setPassword] = useState('a');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      refetch();
+      isFirstRender.current = false;
+    }
+  }, [refetch]);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -228,12 +238,10 @@ const AdminPage = () => {
         component="main"
         sx={{ flexGrow: 1, p: 0, width: { sm: `calc(100% - ${drawerWidth}px)`} ,backgroundColor: '#bbbbbb'}}
       >
-        <QueryClientProvider client={queryClient}>
-          <Container maxWidth="lg" sx={{ mt: 8, mb: 0 , width:'100%', }}>
-            {currentPage === 'dashboard' && <DashboardPage />}
-            {currentPage === 'questions' && <QuestionManagementPage />}
-          </Container>
-        </QueryClientProvider>
+        <Container maxWidth="lg" sx={{ mt: 8, mb: 0 , width:'100%', }}>
+          {currentPage === 'dashboard' && <DashboardPage />}
+          {currentPage === 'questions' && (isCharacterLoading ? <div>Loading...</div> : <QuestionManagementPage data = {data}/>)}
+        </Container>
       </Box>
     </Box>
   );

@@ -5,6 +5,7 @@ const useApi = (endpoint, options = {}) => {
     method = 'GET',
     body,
     queryKey = [endpoint],
+    enabled = true,
     ...restOptions
   } = options;
 
@@ -32,9 +33,11 @@ const useApi = (endpoint, options = {}) => {
     }
   };
 
-  return method.toUpperCase() === 'GET'
-    ? useQuery(queryKey, fetchData)
-    : useMutation(fetchData);
+  if (method.toUpperCase() === 'GET') {
+    return useQuery(queryKey, fetchData, enabled);
+  } else {
+    return useMutation(fetchData);
+  }
 };
 
 export default useApi;

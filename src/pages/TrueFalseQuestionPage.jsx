@@ -1,14 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
-import photo from '../assets/好_代1.png';
+import photo1 from '../assets/好_代1.png';
+import photo2 from '../assets/們_代.png';
+import photo3 from '../assets/倒_漏.png';
+import photo4 from '../assets/寫_漏代.png';
+import photo5 from '../assets/我_漏1.png';
 var questions = [
-    { text: '你好', tar: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: {photo} },
-    { text: '你好', tar: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: '好' },
-    { text: '微風', tar: '微', ans: '正確', zhuyin: 'ㄨㄟˊ', display: '微' },
-    { text: '相同', tar: '同', ans: '正確', zhuyin: 'ㄊㄨㄥˊ', display: '同' },
-    { text: '火車', tar: '火', ans: '錯誤', zhuyin: 'ㄏㄨㄛˇ', display: '人' },
-    { text: '日本好玩', tar: '日', ans: '錯誤', zhuyin: 'ㄖˋ', display: '目' },
+    { text: '你好', target: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: photo1 },
+    { text: '你們', target: '們', ans: '錯誤', zhuyin: 'ㄇㄣ˙', display: photo2 },
+    { text: '倒車', target: '倒', ans: '錯誤', zhuyin: 'ㄉㄠˋ', display: photo3 },
+    { text: '寫字', target: '寫', ans: '錯誤', zhuyin: 'ㄒㄧㄝˇ', display: photo4 },
+    { text: '我們', target: '我', ans: '錯誤', zhuyin: 'ㄨㄛˇ', display: photo5 },
 ];
 
 const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
@@ -100,20 +103,23 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
 
   const renderQuestion = () => {
     const question = questions[questionIndex];
-    if (pronunciationType === '注音') {
-      return question.text.replace(question.tar, question.zhuyin);
+    if (question.text.includes(question.target)) {
+      return question.text.replace(question.target, question.zhuyin);
     } else {
       return question.text;
     }
   };
 
-  const renderDisplay = (display) => {
-    if (typeof display === 'string') {
+  const renderDisplay = (display, target) => {
+    if (!display.includes('.png')) {
       return <Typography variant="h4" style={{ fontFamily: '標楷體', color: '#000000' }}>{display}</Typography>;
-    } else if (typeof display === 'object' && display.photo) {
-      return <img src={display.photo} alt="Question" style={{ maxWidth: '1.8em', maxHeight: '1.8em' }} />
+    } else if (display.includes('.png')) {
+      return (<div>
+        <img src={display} alt="Question" style={{ width: '3.2em', height: '3em' }} />
+        <Typography variant="h4" style={{fontSize: '3.5em', fontFamily: '標楷體', color: '#000000' }}>{target}</Typography>
+      </div>)
     } else {
-      return <Typography variant="h4">?</Typography>;
+      return <Typography variant="h4">圖片載入錯誤</Typography>;
     }
   };
 
@@ -155,7 +161,7 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
       )}
       {step === 1 && (
         <Box sx={{ width: '100%', backgroundColor: '#E0E0E0', padding: 2, borderRadius: 2, textAlign: 'center' }}>
-          <Typography variant="h4">{renderQuestion()}</Typography>
+          <Typography variant="h4" style={{fontSize: '3.5em', fontFamily: '標楷體', color: '#000000' }}>{renderQuestion()}</Typography>
         </Box>
       )}
       {step >= 2 && (
@@ -166,7 +172,7 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
           {showOptions && (
             <>
               {answerTiming === '出題後答題' && (
-                renderDisplay(questions[questionIndex].display)
+                renderDisplay(questions[questionIndex].display, questions[questionIndex].target)
               )}
               <Grid container spacing={2} justifyContent="center" mt={2}>
                 <Grid item>

@@ -4,7 +4,7 @@ import BouncingBallsBackground from './BouncingBallsBackground'; // 確保路徑
 
 const BasicInfo = ({ onComplete }) => {
   const [name, setName] = useState('admin');
-  const [researchCode, setResearchCode] = useState('admin1');
+  const [researchCode, setResearchCode] = useState('admin');
 
   const handleSubmit = (event) => {
     event.preventDefault();

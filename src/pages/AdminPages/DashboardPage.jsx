@@ -51,7 +51,7 @@ const initialData = [
     }
   },
   // 為了演示滾動效果，添加更多數據
-  ...Array(200000).fill().map((_, i) => ({
+  ...Array(2000).fill().map((_, i) => ({
     name: `測試用戶 ${i+3}`,
     researchCode: `T00${i+3}`,
     time: '2023-07-03 09:00',

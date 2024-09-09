@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { 
   Table, 
   TableBody, 
@@ -22,7 +22,6 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { useTheme } from '@mui/material/styles';
 import DeleteConfirmationRow from './components/DeleteConfirmationRow';
 import styles from './styles/QuestionManagementPage_styles';
-import useApi from '../../api/useApi';
 
 {/* <Typography><strong>字:</strong> {item.character}</Typography>
 <Typography><strong>部首:</strong> {item.radical}</Typography>
@@ -34,24 +33,10 @@ import useApi from '../../api/useApi';
 <Typography><strong>變種數:</strong> {item.variant_num}</Typography>
 <Typography><strong>詞頻2:</strong> {item.words_frequency}</Typography> */}
 
-// 模擬數據
-const initialData = [
-  {
-    name: '你',
-    researchCode: '5',
-    details: {
-      wordBank: '一年級',
-      difficulty: '簡單',
-      questionCount: 10,
-      feedbackMode: '立即反饋',
-      additionalSettings: '倒計時: 30秒'
-    }
-  }
-];
-
 const ITEMS_PER_PAGE = 50; // 每页显示的项目数
 
-const QuestionManagementPage = () => {
+const QuestionManagementPage = ({ data }) => {
+
   const [selectedRow, setSelectedRow] = useState(null);
   const theme = useTheme();
   const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
@@ -62,10 +47,9 @@ const QuestionManagementPage = () => {
   const [page, setPage] = useState(1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const {data, isLoading, error} = useApi('api/characters');
 
   const filteredData = useMemo(() => {
-    if (!data || isLoading) return [];
+    if (!data) return [];
     
     return data.filter(item => 
       (item.character?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -73,7 +57,7 @@ const QuestionManagementPage = () => {
       // (grade ? item.grade === grade : true) &&
       // (difficulty ? item.difficulty === difficulty : true)
     );
-  }, [searchTerm, grade, difficulty, data, isLoading]);
+  }, [searchTerm, grade, difficulty, data]);
 
   const paginatedData = useMemo(() => {
     const startIndex = (page - 1) * ITEMS_PER_PAGE;
@@ -218,15 +202,21 @@ const QuestionManagementPage = () => {
                 <TableCell>操作</TableCell>
               </TableRow>
             </TableHead>
-            {isLoading && <div>Loading...</div>}
             {data && <TableBody>
-              {data.map((item, index) => (
+              {paginatedData.map((item, index) => (
                 <React.Fragment key={index}>
                   <TableRow 
                     style={selectedRow === index ? styles.selectedRow : {}}
                   >
                     <TableCell sx={{borderBottom: 'none'}}>{item.character}</TableCell>
                     <TableCell sx={{borderBottom: 'none'}}>{item.radical}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.stroke_count}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.character_frequency}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.word_frequency}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.word}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.grade}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.variant_num}</TableCell>
+                    <TableCell sx={{borderBottom: 'none'}}>{item.words_frequency}</TableCell>
                     <TableCell sx={{borderBottom: 'none'}}
                     >
                       <Button 
@@ -256,7 +246,7 @@ const QuestionManagementPage = () => {
                     </TableCell>
                   </TableRow>
                   {<TableRow>
-                      <TableCell colSpan={3} style={{ paddingBottom: 0, paddingTop: 0  }}>
+                      <TableCell colSpan={10} style={{ paddingBottom: 0, paddingTop: 0  }}>
                         <Collapse in={deleteConfirmation === index} timeout="auto" unmountOnExit>
                           <DeleteConfirmationRow
                             index={index}
