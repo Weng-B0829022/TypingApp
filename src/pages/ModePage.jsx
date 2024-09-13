@@ -134,7 +134,7 @@ const ModePage = ({ onComplete }) => {
       </Box>
       <Box sx={boxStyle}>
         <Typography variant="h6" align="center" gutterBottom>
-          發音類型 {errors.pronunciationType && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+          題目顯示類型 {errors.pronunciationType && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
         </Typography>
         <Grid container spacing={1}>
           {['注音', '發音'].map((type) => (

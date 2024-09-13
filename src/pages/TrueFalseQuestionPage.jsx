@@ -13,7 +13,7 @@ var questions = [
     { text: '寫字', target: '寫', ans: '錯誤', zhuyin: 'ㄒㄧㄝˇ', display: photo4 },
     { text: '我們', target: '我', ans: '錯誤', zhuyin: 'ㄨㄛˇ', display: photo5 },
 ];
-
+//1.遺漏 添加 替代2.鏡像3.注音4.同音別字
 const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
   const [step, setStep] = useState(0);
   const [countdown, setCountdown] = useState(startCountdown);
