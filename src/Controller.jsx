@@ -23,6 +23,7 @@ const Controller = () => {
     answerTiming: '',    // 新增：答題時機（出題後答題/出題時答題）
     pronunciationType: '', // 新增：發音類型（注音/發音）
     isRetryIncorrect: '否',
+    errorRetry:'加入最後面' 
   });
   const [questionInfo, setQuestionInfo] = useState(null);
   const [resultInfo, setResultInfo] = useState(null);
@@ -99,6 +100,7 @@ const Controller = () => {
               onComplete={handleQuestionComplete}
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
+              errorRetry={modeInfo.errorRetry}
             />
           ) : (
             <MultipleChoiceQuestionPage
@@ -109,6 +111,7 @@ const Controller = () => {
               onComplete={handleQuestionComplete}
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
+              errorRetry={modeInfo.errorRetry}
             />
           )
         )}

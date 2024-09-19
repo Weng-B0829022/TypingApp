@@ -16,6 +16,7 @@ const ModePage = ({ onComplete }) => {
     questionFormat: '是非題',  // 新增：題目格式（是非題/二選一選擇題）
     answerTiming: '出題後答題',  
     isRetryIncorrect: '否',
+    errorRetry:'加入最後面' //0馬上 1最後面
   });
 
   const [errors, setErrors] = useState({});
@@ -56,6 +57,12 @@ const ModePage = ({ onComplete }) => {
     }
   };
 
+  const buttonStyle = {
+    '&:focus': {
+      outline: 'none',
+      boxShadow: 'none',
+    }
+  }
   const boxStyle = {
     width: '80%', 
     mb: 2, 
@@ -92,12 +99,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('questionFormat', format)}
                 style={{ color: selected.questionFormat === format ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {format}
               </Button>
@@ -119,12 +121,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('answerTiming', timing)}
                 style={{ color: selected.answerTiming === timing ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {timing}
               </Button>
@@ -145,12 +142,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('pronunciationType', type)}
                 style={{ color: selected.pronunciationType === type ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {type}
               </Button>
@@ -171,12 +163,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('grade', grade)}
                 style={{ color: selected.grade === grade ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {grade}
               </Button>
@@ -198,12 +185,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('level', level)}
                 style={{ color: selected.level === level ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {level}
               </Button>
@@ -225,12 +207,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('number', number)}
                 style={{ color: selected.number === number ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {number}題
               </Button>
@@ -252,12 +229,7 @@ const ModePage = ({ onComplete }) => {
                 fullWidth
                 onClick={() => handleButtonClick('mode', mode)}
                 style={{ color: selected.mode === mode ? 'white' : 'black' }}
-                sx={{
-                  '&:focus': {
-                    outline: 'none',
-                    boxShadow: 'none',
-                  },
-                }}
+                sx={buttonStyle}
               >
                 {mode}
               </Button>
@@ -279,6 +251,34 @@ const ModePage = ({ onComplete }) => {
                   fullWidth
                   onClick={() => handleButtonClick('isRetryIncorrect', option)}
                   style={{ color: selected.isRetryIncorrect === option ? 'white' : 'black' }}
+                  sx={{
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  {option}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+      {selected.isRetryIncorrect === '是' && (
+        <Box sx={boxStyle}>
+          <Typography variant="h6" align="center" gutterBottom>
+            重新加入的位置 {errors.isRetryIncorrect && <span style={{ color: 'red', fontSize:'0.7em'}}>(必選)</span>}
+          </Typography>
+          <Grid container spacing={1}>
+            {['立即加入', '加入最後面'].map((option) => (
+              <Grid item xs={6} key={option}>
+                <Button
+                  variant="contained"
+                  color={selected.errorRetry === option ? 'primary' : 'white'}
+                  fullWidth
+                  onClick={() => handleButtonClick('errorRetry', option)}
+                  style={{ color: selected.errorRetry === option ? 'white' : 'black' }}
                   sx={{
                     '&:focus': {
                       outline: 'none',
