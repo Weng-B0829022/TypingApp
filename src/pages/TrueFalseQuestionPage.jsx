@@ -9,9 +9,9 @@ import photo5 from '../assets/我_漏1.png';
 var questions = [
     { text: '你好', target: '好', ans: '錯誤', zhuyin: 'ㄏㄠˇ', display: photo1 },
     { text: '你們', target: '們', ans: '錯誤', zhuyin: 'ㄇㄣ˙', display: photo2 },
-    { text: '倒車', target: '倒', ans: '錯誤', zhuyin: 'ㄉㄠˋ', display: photo3 },
-    { text: '寫字', target: '寫', ans: '錯誤', zhuyin: 'ㄒㄧㄝˇ', display: photo4 },
-    { text: '我們', target: '我', ans: '錯誤', zhuyin: 'ㄨㄛˇ', display: photo5 },
+    //{ text: '倒車', target: '倒', ans: '錯誤', zhuyin: 'ㄉㄠˋ', display: photo3 },
+    //{ text: '寫字', target: '寫', ans: '錯誤', zhuyin: 'ㄒㄧㄝˇ', display: photo4 },
+    //{ text: '我們', target: '我', ans: '錯誤', zhuyin: 'ㄨㄛˇ', display: photo5 },
 ];
 //1.遺漏 添加 替代2.鏡像3.注音4.同音別字
 const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect, errorRetry }) => {

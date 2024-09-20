@@ -20,15 +20,30 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
   const tableRef = useRef(null);
 
   useEffect(() => {
-    const formattedRows = resultInfo.map((item, index) => ({
-      row: index + 1,
-      question: item.question,
-      target: item.target,
-      display: item.display,
-      correctAnswer: item.correctAnswer,
-      userAnswer: item.userAnswer,
-      reactionTime: item.reactionTime
-    }));
+    const questionNumbers = {};
+    const formattedRows = resultInfo.map((item, index) => {
+      if (!questionNumbers[item.question]) {
+        questionNumbers[item.question] = {
+          mainNumber: index + 1,
+          subNumber: 0
+        };
+      } else {
+        questionNumbers[item.question].subNumber++;
+      }
+
+      const { mainNumber, subNumber } = questionNumbers[item.question];
+      const rowNumber = subNumber === 0 ? `${mainNumber}` : `${mainNumber}.${subNumber}`;
+
+      return {
+        row: rowNumber,
+        question: item.question,
+        display: item.display,
+        correctAnswer: item.correctAnswer,
+        userAnswer: item.userAnswer,
+        reactionTime: item.reactionTime
+      };
+    });
+
     setRows(formattedRows);
     console.log("Result data loaded:", formattedRows);
 
