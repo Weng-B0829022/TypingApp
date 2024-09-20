@@ -116,8 +116,17 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
     } else if (display.includes('.png')) {
       return (<div>
         <img src={display} alt="Question" style={{ width: '3.2em', height: '3em' }} />
-        <Typography variant="h4" style={{fontSize: '3.5em', fontFamily: '標楷體', color: '#000000' }}>{target}</Typography>
-      </div>)
+        <Typography 
+          variant="h1" 
+          sx={{
+            fontWeight: 100,
+            fontSize: '3.5em',
+            fontFamily: '標楷體',
+            color: '#000000'
+          }}
+        >
+          {target}
+        </Typography></div>)
     } else {
       return <Typography variant="h4">圖片載入錯誤</Typography>;
     }
