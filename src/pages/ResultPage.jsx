@@ -103,7 +103,23 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
     const correctAnswers = rows.filter(row => row.userAnswer === row.correctAnswer).length;
     return (correctAnswers / rows.length * 100).toFixed(2);
   };
-
+  const renderDisplay = (target) => {
+    console.log(target)
+    if (target.includes('.png') || target.includes('.jpg') || target.includes('.jpeg')) {
+      // 如果是圖片路徑，渲染為圖片
+      return (
+        <img src={target} alt="Question" style={{ width: '1.2em', height: '1em' }} />
+      );
+    }else if (typeof target === 'string') {
+      // 如果 display 是字符串，直接渲染文本
+      return (
+        <TableCell sx={{ padding: '0px'}} align="right">{target}</TableCell>
+      );
+    }else {
+      // 如果 display 是其他類型或未定義，顯示錯誤消息
+      return <Typography variant="h4">無法顯示內容</Typography>;
+    }
+  };
   return (
     <Container maxWidth={false} style={sharedContainerStyle} ref={tableRef}>
       <Box
@@ -138,7 +154,7 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
                   <TableCell sx={{ padding: '0px'}} align="right" component="th" scope="row">{row.row}</TableCell>
                   <TableCell sx={{ padding: '0px'}} align="right">{row.question}</TableCell>
                   <TableCell sx={{ padding: '0px'}} align="right">{row.target}</TableCell>
-                  <TableCell sx={{ padding: '0px'}} align="right">{row.display}</TableCell>
+                  {renderDisplay(row.display)}
                   <TableCell sx={{ padding: '0px'}} align="right">{row.correctAnswer}</TableCell>
                   <TableCell sx={{ padding: '0px'}} align="right">
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>

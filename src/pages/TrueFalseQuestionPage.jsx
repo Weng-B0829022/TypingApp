@@ -13,8 +13,8 @@ var questions = [
     { text: '寫字', target: '寫', ans: '錯誤', zhuyin: 'ㄒㄧㄝˇ', display: photo4 },
     { text: '我們', target: '我', ans: '錯誤', zhuyin: 'ㄨㄛˇ', display: photo5 },
 ];
-
-const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
+//1.遺漏 添加 替代2.鏡像3.注音4.同音別字
+const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect, errorRetry }) => {
   const [step, setStep] = useState(0);
   const [countdown, setCountdown] = useState(startCountdown);
   const [questionIndex, setQuestionIndex] = useState(0);
@@ -76,8 +76,13 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
       setFeedback(isCorrect ? 'correct' : 'incorrect');
 
       if (!isCorrect && isRetryIncorrect) {
-        // 如果答錯，將當前問題添加到問題列表的末尾
-        questions = [...questions, questions[questionIndex]];
+        if (errorRetry === '立即加入') {
+          // 如果答錯，立即在當前位置之後插入同一個問題
+          questions.splice(questionIndex + 1, 0, questions[questionIndex]);
+        } else if (errorRetry === '加入最後面') {
+          // 如果答錯，將當前問題添加到問題列表的末尾
+          questions.push(questions[questionIndex]);
+        }
       }
 
       setTimeout(() => {
