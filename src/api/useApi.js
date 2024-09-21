@@ -1,25 +1,29 @@
-import { useQuery, useMutation } from 'react-query';
-
 const useApi = (endpoint, options = {}) => {
-  const { 
+  const {
     method = 'GET',
     body,
-    queryKey = [endpoint],
-    enabled = true,
+    headers: customHeaders,
     ...restOptions
   } = options;
 
   const fetchData = async () => {
     try {
-      const response = await fetch(`http://localhost:5001/${endpoint}`, {
+      const headers = {
+        'Content-Type': 'application/json',
+        ...customHeaders
+      };
+
+      const fetchOptions = {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...restOptions.headers
-        },
-        body: body ? JSON.stringify(body) : undefined,
+        headers,
         ...restOptions
-      });
+      };
+
+      if (body) {
+        fetchOptions.body = JSON.stringify(body);
+      }
+
+      const response = await fetch(`http://localhost:5001/${endpoint}`, fetchOptions);
 
       if (!response.ok) {
         throw new Error(`API call failed: ${response.status} ${response.statusText}`);
@@ -33,11 +37,7 @@ const useApi = (endpoint, options = {}) => {
     }
   };
 
-  if (method.toUpperCase() === 'GET') {
-    return useQuery(queryKey, fetchData, enabled);
-  } else {
-    return useMutation(fetchData);
-  }
+  return fetchData;
 };
 
 export default useApi;
