@@ -26,8 +26,7 @@ const Controller = () => {
     errorRetry:'加入最後面',
     questions:[{"text": "","target": "","ans": "","display": ""}]
   });
-  const [questionInfo, setQuestionInfo] = useState(null);
-  const [resultInfo, setResultInfo] = useState(null);
+  const [answerInfo, setAnswerInfo] = useState(null);
 
   const nextPage = () => {
     setCurrentPage(prevPage => (prevPage + 1) % 4);
@@ -45,14 +44,14 @@ const Controller = () => {
     nextPage();
   };
 
-  const handleQuestionComplete = (data) => {
-    setQuestionInfo(data);
-    console.log("測驗完成，所有答案：\n", basicInfo, modeInfo, data, resultInfo);
+  const handleQuestionComplete = (data) => {//完成答題後將結果存入AnswerInfo
+    setAnswerInfo(data);
+    console.log("測驗完成，所有答案：\n", basicInfo, modeInfo);
     nextPage();
   };
 
   const handleResultComplete = (data) => {
-    setResultInfo(data);
+    console.log("結果查看面完成，所有答案：\n", basicInfo, modeInfo, answerInfo, data);
     nextPage();
   };
 
@@ -72,11 +71,11 @@ const Controller = () => {
               queIntervel={modeInfo.queIntervel}
               answerTiming={modeInfo.answerTiming}
               pronunciationType={modeInfo.pronunciationType}
-              onComplete={handleQuestionComplete}
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
               errorRetry={modeInfo.errorRetry}
               questions={modeInfo.questions}
+              onComplete={handleQuestionComplete}
             />
           ) : (
             <MultipleChoiceQuestionPage
@@ -84,19 +83,19 @@ const Controller = () => {
               queIntervel={modeInfo.queIntervel}
               answerTiming={modeInfo.answerTiming}
               pronunciationType={modeInfo.pronunciationType}
-              onComplete={handleQuestionComplete}
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
               errorRetry={modeInfo.errorRetry}
+              onComplete={handleQuestionComplete}
             />
           )
         )}
         {currentPage === 3 && (
           <ResultPage 
-            resultInfo={questionInfo} 
+            answerInfo={answerInfo} 
             basicInfo={basicInfo}
             modeInfo={modeInfo}
-            onComplete={handleResultComplete} 
+            onComplete={handleResultComplete}
           />
         )}
       </div>

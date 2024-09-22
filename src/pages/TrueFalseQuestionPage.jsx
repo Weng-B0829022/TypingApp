@@ -1,11 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
-import photo1 from '../assets/好_代1.png';
-import photo2 from '../assets/們_代.png';
-import photo3 from '../assets/倒_漏.png';
-import photo4 from '../assets/寫_漏代.png';
-import photo5 from '../assets/我_漏1.png';
+
 //1.遺漏 添加 替代2.鏡像3.注音4.同音別字
 const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect, errorRetry, questions}) => {
   const [step, setStep] = useState(0);
@@ -57,7 +53,7 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
     const isCorrect = answer === questions[questionIndex].ans;
     const newAnswers = [...answers, { 
       question: questions[questionIndex].text,
-      target: questions[questionIndex].tar,
+      target: questions[questionIndex].target,
       display: questions[questionIndex].display,
       userAnswer: answer,
       correctAnswer: questions[questionIndex].ans,
@@ -79,7 +75,6 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
       }
 
       setTimeout(() => {
-        console.log('setFeedback(null)')
         setFeedback(null);
         moveToNextQuestion(newAnswers);
       }, 1000);
@@ -109,13 +104,15 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
   };
 
   const renderDisplay = (display, target) => {
-    if (!display.includes('.png')) {
-      return <Typography variant="h4" style={{ fontFamily: '標楷體', color: '#000000' }}>{display}</Typography>;
-    } else if (display.includes('.png')) {
-      return (<div>
-        <img src={display} alt="Question" style={{ width: '3.2em', height: '3em' }} />
-        <Typography 
-          variant="h1" 
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <img 
+          src={display} 
+          alt="Question" 
+          style={{ width: '3.2em', height: '3.2em', marginBottom: '0.5em' }} 
+        />
+        {/* <Typography
+          variant="h1"
           sx={{
             fontWeight: 100,
             fontSize: '3.5em',
@@ -124,10 +121,9 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
           }}
         >
           {target}
-        </Typography></div>)
-    } else {
-      return <Typography variant="h4">圖片載入錯誤</Typography>;
-    }
+        </Typography> */}
+      </div>
+    );
   };
 
   return (

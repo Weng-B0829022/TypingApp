@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails, TextField } from '@mui/material';
+import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails, TextField,
+  Snackbar, Alert
+} from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CharacterWordTable from './ModePage/CharacterWordTable';
@@ -20,24 +22,34 @@ const ModePage = ({ onComplete }) => {
     errorRetry:'加入最後面' //0馬上 1最後面
   });
   const [questions, setQuestions] = useState([]);
+  const [error, setError] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+
+  const handleCloseSnackbar = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
 
   const handleStart = () => {
-    const newErrors = {};
-    if (!selected.grade) newErrors.grade = true;
-    if (!selected.level) newErrors.level = true;
-    if (!selected.number) newErrors.number = true;
-    if (!selected.mode) newErrors.mode = true;
-    if (!selected.startCountdown) newErrors.startCountdown = true;
-    if (!selected.queIntervel) newErrors.queIntervel = true;
-    if (!selected.questionFormat) newErrors.questionFormat = true;
-    if (!selected.answerTiming) newErrors.answerTiming = true;
-    if (!selected.pronunciationType) newErrors.pronunciationType = true;
-    if (selected.mode === '立即回饋' && !selected.isRetryIncorrect) newErrors.isRetryIncorrect = true;
-    if (selected.isRetryIncorrect === '是' && !selected.errorRetry) newErrors.errorRetry = true;
+    let newError = '';
+    if (!selected.number) newError = '請選擇題目數';
+    else if (!selected.mode) newError = '請選擇回饋模式';
+    else if (!selected.startCountdown) newError = '請設置開始時準備時間';
+    else if (!selected.queIntervel) newError = '請設置題目間隔時間';
+    else if (!selected.questionFormat) newError = '請選擇題目格式';
+    else if (!selected.answerTiming) newError = '請選擇答題時機';
+    else if (!selected.pronunciationType) newError = '請選擇題目顯示類型';
+    else if (selected.mode === '立即回饋' && !selected.isRetryIncorrect) newError = '請選擇是否重新加入錯誤題目';
+    else if (selected.isRetryIncorrect === '是' && !selected.errorRetry) newError = '請選擇重新加入的位置';
+    else if (questions.length < parseInt(selected.number)) newError = `請至少選擇 ${selected.number} 個題目`;
 
-    if (Object.keys(newErrors).length > 0) {
-      console.log("Please fill in all required fields");
+    if (newError) {
+      setError(newError);
+      setSnackbarOpen(true);
     } else {
+      setError('');
       onComplete({ ...selected, questions });
     }
   };
@@ -52,7 +64,7 @@ const ModePage = ({ onComplete }) => {
     }));
   
     setQuestions(newQuestions);
-    console.log('Questions set:', newQuestions);
+    //console.log('Questions set:', newQuestions);
   };
 
   const handleButtonClick = (category, value) => {
@@ -426,6 +438,11 @@ const ModePage = ({ onComplete }) => {
             onSelectQuestions={setSelectedQuestions}
           />
         </Box>
+        <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
+          <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        </Snackbar>
       </Grid>
     </Grid>
   );

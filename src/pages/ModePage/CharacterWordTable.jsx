@@ -240,7 +240,7 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
                 字詞表格 (年級: {grade}, 難度: {level}, 需選擇: {number})
             </Typography>
             
-            <Snackbar open={snackbarOpen} autoHideDuration={6000} onClose={handleCloseSnackbar}>
+            <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
                 <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
                     {error}
                 </Alert>

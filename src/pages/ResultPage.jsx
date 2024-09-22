@@ -15,13 +15,14 @@ const sharedContainerStyle = {
   backgroundColor: '#E0E0E0',
 };
 
-const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
+const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
   const [rows, setRows] = useState([]);
   const tableRef = useRef(null);
 
   useEffect(() => {
+    console.log(answerInfo)
     const questionNumbers = {};
-    const formattedRows = resultInfo.map((item, index) => {
+    const formattedRows = answerInfo.map((item, index) => {
       if (!questionNumbers[item.question]) {
         questionNumbers[item.question] = {
           mainNumber: index + 1,
@@ -37,6 +38,7 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
       return {
         row: rowNumber,
         question: item.question,
+        target: item.target,
         display: item.display,
         correctAnswer: item.correctAnswer,
         userAnswer: item.userAnswer,
@@ -58,7 +60,6 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
           body: JSON.stringify({
             basicInfo,
             modeInfo,
-            questionInfo: resultInfo,
             resultInfo: formattedRows,
           }),
         });
@@ -74,7 +75,7 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
     };
 
     sendData();
-  }, [resultInfo, basicInfo, modeInfo]);
+  }, [answerInfo, basicInfo, modeInfo]);
 
   
   const handleShare = async () => {
@@ -118,22 +119,29 @@ const ResultPage = ({ resultInfo, basicInfo, modeInfo, onComplete }) => {
     const correctAnswers = rows.filter(row => row.userAnswer === row.correctAnswer).length;
     return (correctAnswers / rows.length * 100).toFixed(2);
   };
-  const renderDisplay = (target) => {
-    console.log(target)
-    if (target.includes('.png') || target.includes('.jpg') || target.includes('.jpeg')) {
-      // 如果是圖片路徑，渲染為圖片
-      return (
-        <img src={target} alt="Question" style={{ width: '1.2em', height: '1em' }} />
-      );
-    }else if (typeof target === 'string') {
-      // 如果 display 是字符串，直接渲染文本
-      return (
-        <TableCell sx={{ padding: '0px'}} align="right">{target}</TableCell>
-      );
-    }else {
-      // 如果 display 是其他類型或未定義，顯示錯誤消息
-      return <Typography variant="h4">無法顯示內容</Typography>;
-    }
+  const renderDisplay = (display) => {
+    return (
+      <TableCell sx={{ padding: '0px'}} align="right">
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <img 
+            src={display} 
+            alt="Question" 
+            style={{ width: '1.6em', height: '1.6em', marginBottom: '0.5em' }} 
+          />
+          {/* <Typography
+            variant="h1"
+            sx={{
+              fontWeight: 100,
+              fontSize: '3.5em',
+              fontFamily: '標楷體',
+              color: '#000000'
+            }}
+          >
+            {target}
+          </Typography> */}
+        </div>
+      </TableCell>
+    );
   };
   return (
     <Container maxWidth={false} style={sharedContainerStyle} ref={tableRef}>
