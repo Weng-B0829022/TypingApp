@@ -3,7 +3,7 @@ import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, 
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CharacterWordTable from './ModePage/CharacterWordTable';
-
+import toZhuyin from '../utils/toZhuyin';
 const ModePage = ({ onComplete }) => {
   const theme = useTheme();
   const [selected, setSelected] = useState({
@@ -19,7 +19,41 @@ const ModePage = ({ onComplete }) => {
     isRetryIncorrect: '否',
     errorRetry:'加入最後面' //0馬上 1最後面
   });
+  const [questions, setQuestions] = useState([]);
+
+  const handleStart = () => {
+    const newErrors = {};
+    if (!selected.grade) newErrors.grade = true;
+    if (!selected.level) newErrors.level = true;
+    if (!selected.number) newErrors.number = true;
+    if (!selected.mode) newErrors.mode = true;
+    if (!selected.startCountdown) newErrors.startCountdown = true;
+    if (!selected.queIntervel) newErrors.queIntervel = true;
+    if (!selected.questionFormat) newErrors.questionFormat = true;
+    if (!selected.answerTiming) newErrors.answerTiming = true;
+    if (!selected.pronunciationType) newErrors.pronunciationType = true;
+    if (selected.mode === '立即回饋' && !selected.isRetryIncorrect) newErrors.isRetryIncorrect = true;
+    if (selected.isRetryIncorrect === '是' && !selected.errorRetry) newErrors.errorRetry = true;
+
+    if (Object.keys(newErrors).length > 0) {
+      console.log("Please fill in all required fields");
+    } else {
+      onComplete({ ...selected, questions });
+    }
+  };
+
+  const setSelectedQuestions = (selectedItems) => {
+    const newQuestions = selectedItems.map((item) => ({
+      text: item.word,
+      target: item.character,
+      ans: item.isCorrectVariant ? '正確' : '錯誤',
+      zhuyin: toZhuyin[item.character],
+      display: `data:image/png;base64,${item.selectedVariantImage}`
+    }));
   
+    setQuestions(newQuestions);
+    console.log('Questions set:', newQuestions);
+  };
 
   const handleButtonClick = (category, value) => {
     setSelected((prevState) => {
@@ -66,7 +100,7 @@ const ModePage = ({ onComplete }) => {
 
   return (
     <Grid container spacing={0}>
-      <Grid item xs={6} md={6}>
+      <Grid item xs={5} md={5}>
       <Container
         maxWidth="sm"
         style={{
@@ -364,18 +398,19 @@ const ModePage = ({ onComplete }) => {
           color="primary" 
           fullWidth
           sx={{ mt: 2 }}
+          onClick={handleStart}
         >
           開始測驗
         </Button>
       </Container>
       </Grid>
-      <Grid item xs={6} md={6}>
+      <Grid item xs={7} md={7}>
       <Box
         sx={{
           position: 'fixed',
           top: 0,
           background:'#F5F5F5',
-          width: '47%', // 調整寬度以適應您的需求
+          width: '55%', // 調整寬度以適應您的需求
           zIndex: 1000,
           height: '96vh',
           overflowY: 'auto',
@@ -386,8 +421,9 @@ const ModePage = ({ onComplete }) => {
       >
           <CharacterWordTable 
             grade={selected.grade.charAt(0)} 
-            level={selected.level} 
-            number={selected.number} 
+            level={selected.level}
+            number={selected.number}
+            onSelectQuestions={setSelectedQuestions}
           />
         </Box>
       </Grid>

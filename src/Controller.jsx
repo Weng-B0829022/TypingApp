@@ -23,7 +23,8 @@ const Controller = () => {
     answerTiming: '',    // 新增：答題時機（出題後答題/出題時答題）
     pronunciationType: '', // 新增：發音類型（注音/發音）
     isRetryIncorrect: '否',
-    errorRetry:'加入最後面' 
+    errorRetry:'加入最後面',
+    questions:[{"text": "","target": "","ans": "","display": ""}]
   });
   const [questionInfo, setQuestionInfo] = useState(null);
   const [resultInfo, setResultInfo] = useState(null);
@@ -47,38 +48,12 @@ const Controller = () => {
   const handleQuestionComplete = (data) => {
     setQuestionInfo(data);
     console.log("測驗完成，所有答案：\n", basicInfo, modeInfo, data, resultInfo);
-
-    // 發送請求到後端
-    /*try {
-      const response = await fetch('http://localhost:8080/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          basicInfo,
-          modeInfo,
-          questionInfo: data,
-          resultInfo,
-        }),
-      });
-
-      if (response.ok) {
-        console.log('數據發送成功');
-      } else {
-        console.error('數據發送失敗');
-      }
-    } catch (error) {
-      console.error('發送請求時出錯:', error);
-    }*/
-
     nextPage();
   };
 
   const handleResultComplete = (data) => {
     setResultInfo(data);
     nextPage();
-    // Add logic for after completing all stages here
   };
 
   const isAdmin = basicInfo?.name === 'admin' && basicInfo?.researchCode === 'admin';
@@ -101,6 +76,7 @@ const Controller = () => {
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
               errorRetry={modeInfo.errorRetry}
+              questions={modeInfo.questions}
             />
           ) : (
             <MultipleChoiceQuestionPage
