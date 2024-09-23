@@ -307,7 +307,7 @@ const ModePage = ({ onComplete }) => {
         {selected.isRetryIncorrect === '是' && (
           <Box sx={boxStyle}>
             <Typography variant="h6" align="center" gutterBottom>
-              重新加入的位置 
+              重新加入時穿插的位置 
             </Typography>
             <Grid container spacing={1}>
               {['立即加入', '加入最後面'].map((option) => (

@@ -3,6 +3,8 @@ import { Container, Typography, Box, Button, Table, TableBody, TableCell, TableC
 import ShareIcon from '@mui/icons-material/Share';
 import html2canvas from 'html2canvas';
 import { Share } from 'lucide-react';
+import GetAppIcon from '@mui/icons-material/GetApp';
+import { utils, writeFile } from 'xlsx';
 
 const sharedContainerStyle = {
   width: '100%',
@@ -143,6 +145,12 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
       </TableCell>
     );
   };
+  const handleExportExcel = () => {
+    const ws = utils.json_to_sheet(rows);
+    const wb = utils.book_new();
+    utils.book_append_sheet(wb, ws, "Results");
+    writeFile(wb, "test_results.xlsx");
+  };
   return (
     <Container maxWidth={false} style={sharedContainerStyle} ref={tableRef}>
       <Box
@@ -219,6 +227,16 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
             分享
           </Button>
           </Grid> 
+          <Grid item>
+            <Button 
+              variant="contained" 
+              color="primary" 
+              onClick={handleExportExcel}
+              startIcon={<GetAppIcon />}
+            >
+              匯出
+            </Button>
+          </Grid>
           <Grid item>
             <Button 
               variant="contained" 
