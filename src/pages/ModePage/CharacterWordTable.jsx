@@ -14,7 +14,7 @@ const cellStyle = {
     textOverflow: 'ellipsis',
 };
 
-const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
+const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionFormat }) => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [data, setData] = useState(null);
@@ -99,7 +99,7 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
             let newItems;
             if (isSelected) {
                 setError('');
-                // Clear selected variant for this item
+                // 清除該項目的已選變體
                 setSelectedVariants(prevVariants => {
                     const newVariants = { ...prevVariants };
                     delete newVariants[item.id];
@@ -113,17 +113,24 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
             } else {
                 if (prev.length < number) {
                     setError('');
-                    // Auto-select the first variant
-                    const firstVariant = item.variants && item.variants.length > 0 ? item.variants[0] : null;
-                    setSelectedVariants(prevVariants => ({
-                        ...prevVariants,
-                        [item.id]: 0
-                    }));
+                    // 對於二選一選擇題，自動選擇前兩個變體
+                    if (questionFormat === '二選一選擇題') {
+                        setSelectedVariants(prevVariants => ({
+                            ...prevVariants,
+                            [item.id]: [0, 1]
+                        }));
+                    } else {
+                        // 對於其他格式，選擇第一個變體
+                        setSelectedVariants(prevVariants => ({
+                            ...prevVariants,
+                            [item.id]: 0
+                        }));
+                    }
                     newItems = [...prev, { 
                         ...item, 
                         order: prev.length + 1,
-                        selectedVariantImage: firstVariant ? firstVariant.image : null,
-                        isCorrectVariant: true  // Mark as correct because it's the first variant
+                        selectedVariantImage: item.variants[0].image,
+                        isCorrectVariant: questionFormat !== '二選一選擇題'
                     }];
                 } else {
                     setError(`您只能選擇 ${number} 個題目。`);
@@ -133,7 +140,7 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
             }
             return newItems;
         });
-    }, [number, setError, setSnackbarOpen]);
+    }, [number, setError, setSnackbarOpen, questionFormat]);
 
     const handleVariantSelect = useCallback((item, variantIndex) => {
         setSelectedItems(prevItems => {
@@ -153,78 +160,100 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
                 newItems.push({ 
                     ...item, 
                     order: newItems.length + 1,
-                    selectedVariantImage: selectedVariant.image,
-                    isCorrectVariant: variantIndex === 0  // Only correct if it's the first variant
+                    selectedVariantImage: questionFormat === '二選一選擇題' 
+                        ? [item.variants[0].image, selectedVariant.image]
+                        : selectedVariant.image,
+                    isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0
                 });
             } else {
                 newItems = newItems.map(selected => 
                     selected.id === item.id 
                         ? { 
                             ...selected, 
-                            selectedVariantImage: selectedVariant.image,
-                            isCorrectVariant: variantIndex === 0  // Update correctness based on variant index
+                            selectedVariantImage: questionFormat === '二選一選擇題'
+                                ? [item.variants[0].image, selectedVariant.image]
+                                : selectedVariant.image,
+                            isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0
                         }
                         : selected
                 );
             }
             
-            setSelectedVariants(prev => ({
-                ...prev,
-                [item.id]: variantIndex
-            }));
+            // 對於二選一選擇題，當選擇後面的選項時，自動選中第一個選項
+            if (questionFormat === '二選一選擇題' && variantIndex > 0) {
+                setSelectedVariants(prev => ({
+                    ...prev,
+                    [item.id]: [0, variantIndex]
+                }));
+            } else if (questionFormat !== '二選一選擇題') {
+                setSelectedVariants(prev => ({
+                    ...prev,
+                    [item.id]: variantIndex
+                }));
+            }
             
             setError('');
             return newItems;
         });
-    }, [number, setError, setSnackbarOpen]);
+    }, [number, setError, setSnackbarOpen, questionFormat]);
 
     const renderVariantImages = useCallback((variants, item) => {
         return (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                {variants.map((variant, index) => (
-                    <Box 
-                        key={index} 
-                        sx={{ 
-                            position: 'relative', 
-                            width: '48px', 
-                            height: '48px'
-                        }}
-                    >
-                        <img 
-                            src={`data:image/png;base64,${variant.image}`}
-                            alt={variant.file_path}
-                            style={{ 
-                                width: '100%', 
-                                height: '100%', 
-                                objectFit: 'contain', 
-                                cursor: 'pointer',
-                                opacity: selectedVariants[item.id] === index ? 0.8 : 1
+                {variants.map((variant, index) => {
+                    // 判斷該變體是否可選
+                    const isSelectable = questionFormat !== '二選一選擇題' || index > 0;
+                    // 判斷該變體是否被選中
+                    const isSelected = Array.isArray(selectedVariants[item.id])
+                        ? selectedVariants[item.id].includes(index)
+                        : selectedVariants[item.id] === index;
+                    
+                    return (
+                        <Box 
+                            key={index} 
+                            sx={{ 
+                                position: 'relative', 
+                                width: '48px', 
+                                height: '48px'
                             }}
-                            onClick={() => handleVariantSelect(item, index)}
-                        />
-                        {selectedVariants[item.id] === index && (
-                            <Box
-                                sx={{
-                                    position: 'absolute',
-                                    top: 0,
-                                    right: 0,
-                                    borderRadius: '50%',
-                                    padding: '2px',
+                        >
+                            <img 
+                                src={`data:image/png;base64,${variant.image}`}
+                                alt={variant.file_path}
+                                style={{ 
+                                    width: '100%', 
+                                    height: '100%', 
+                                    objectFit: 'contain', 
+                                    cursor: isSelectable ? 'pointer' : 'default',
+                                    opacity: isSelected ? 0.8 : 1
                                 }}
-                            >
-                                <CheckCircleIcon 
+                                onClick={() => isSelectable && handleVariantSelect(item, index)}
+                            />
+                            {/* 顯示選中的標記 */}
+                            {isSelected && (
+                                <Box
                                     sx={{
-                                        fontSize: 20,
-                                        color: 'primary.main',
+                                        position: 'absolute',
+                                        top: 0,
+                                        right: 0,
+                                        borderRadius: '50%',
+                                        padding: '2px',
                                     }}
-                                />
-                            </Box>
-                        )}
-                    </Box>
-                ))}
+                                >
+                                    <CheckCircleIcon 
+                                        sx={{
+                                            fontSize: 20,
+                                            color: 'primary.main',
+                                        }}
+                                    />
+                                </Box>
+                            )}
+                        </Box>
+                    );
+                })}
             </Box>
         );
-    }, [selectedVariants, handleVariantSelect]);
+    }, [selectedVariants, handleVariantSelect, questionFormat]);
 
     if (isLoading) {
         return (
@@ -264,9 +293,9 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
                 {selectedItems.map((item) => (
                     <Chip
                         key={item.id}
-                        avatar={item.selectedVariantImage ? 
-                            <Avatar src={`data:image/png;base64,${item.selectedVariantImage}`} /> : 
-                            undefined
+                        avatar={questionFormat == '二選一選擇題' ? 
+                            <Avatar src={`data:image/png;base64,${item.selectedVariantImage[1]}`} /> : 
+                            <Avatar src={`data:image/png;base64,${item.selectedVariantImage}`} />
                         }
                         label={`${item.order}. ${item.character} - ${item.word}`}
                         onDelete={() => handleSelect(item)}
