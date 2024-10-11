@@ -55,13 +55,29 @@ const ModePage = ({ onComplete }) => {
   };
 
   const setSelectedQuestions = (selectedItems) => {
-    const newQuestions = selectedItems.map((item) => ({
-      text: item.word,
-      target: item.character,
-      ans: item.isCorrectVariant ? '正確' : '錯誤',
-      zhuyin: toZhuyin[item.character],
-      display: `data:image/png;base64,${item.selectedVariantImage}`
-    }));
+    const newQuestions = selectedItems.map((item) => {
+      if (selected.questionFormat === '是非題') {
+        return {
+          text: item.word,
+          target: item.character,
+          ans: item.isCorrectVariant ? '正確' : '錯誤',
+          zhuyin: toZhuyin[item.character],
+          display: `data:image/png;base64,${item.selectedVariantImage}`
+        };
+      } else if (selected.questionFormat === '二選一選擇題') {
+        // Assuming item.alternativeCharacter exists for the second option
+        return {
+          text: item.word,
+          target: item.character,
+          display: [
+            `data:image/png;base64,${item.selectedVariantImage[0]}`,
+            `data:image/png;base64,${item.selectedVariantImage[1]}`
+          ],
+          ans: item.character,
+          zhuyin: toZhuyin[item.character]
+        };
+      }
+    });
   
     setQuestions(newQuestions);
     //console.log('Questions set:', newQuestions);

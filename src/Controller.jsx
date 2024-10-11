@@ -86,6 +86,7 @@ const Controller = () => {
               isFeedbackImmediately={modeInfo.mode === '立即回饋'}
               isRetryIncorrect={modeInfo.isRetryIncorrect === '是'}
               errorRetry={modeInfo.errorRetry}
+              questions={modeInfo.questions}
               onComplete={handleQuestionComplete}
             />
           )

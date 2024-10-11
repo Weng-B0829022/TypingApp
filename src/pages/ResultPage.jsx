@@ -22,21 +22,23 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
   const tableRef = useRef(null);
 
   useEffect(() => {
-    console.log(answerInfo)
     const questionNumbers = {};
-    const formattedRows = answerInfo.map((item, index) => {
+    let mainQuestionCount = 0;
+  
+    const formattedRows = answerInfo.map((item) => {
       if (!questionNumbers[item.question]) {
+        mainQuestionCount++;
         questionNumbers[item.question] = {
-          mainNumber: index + 1,
+          mainNumber: mainQuestionCount,
           subNumber: 0
         };
       } else {
         questionNumbers[item.question].subNumber++;
       }
-
+  
       const { mainNumber, subNumber } = questionNumbers[item.question];
       const rowNumber = subNumber === 0 ? `${mainNumber}` : `${mainNumber}.${subNumber}`;
-
+  
       return {
         row: rowNumber,
         question: item.question,
@@ -47,7 +49,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
         reactionTime: item.reactionTime
       };
     });
-
+  
     setRows(formattedRows);
     console.log("Result data loaded:", formattedRows);
 
@@ -211,7 +213,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
           總反應時間: {calculateTotalTime()} ms
         </Typography>
         <Typography variant="h6" gutterBottom>
-          正確題數: {rows.filter(row => row.userAnswer === row.correctAnswer).length}
+          正確題數  /  總題數: {rows.filter(row => row.userAnswer === row.correctAnswer).length}  /  {rows.length}  題
         </Typography>
         <Typography variant="h6" gutterBottom>
           正確率: {calculateAccuracy()}%
