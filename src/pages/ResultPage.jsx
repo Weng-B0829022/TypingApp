@@ -39,19 +39,31 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
       const { mainNumber, subNumber } = questionNumbers[item.question];
       const rowNumber = subNumber === 0 ? `${mainNumber}` : `${mainNumber}.${subNumber}`;
   
-      return {
-        row: rowNumber,
-        question: item.question,
-        target: item.target,
-        display: item.display,
-        correctAnswer: item.correctAnswer,
-        userAnswer: item.userAnswer,
-        reactionTime: item.reactionTime
-      };
+      if (modeInfo.questionFormat === "二選一選擇題") {
+        return {
+          row: rowNumber ,
+          question: item.question,
+          target: item.target,
+          display: item.options, // 假設 item 中包含選項數組
+          correctAnswer: item.correctAnswer,
+          userAnswer: item.userAnswer,
+          reactionTime: item.reactionTime
+        };
+      } else {
+        return {
+          row: rowNumber,
+          question: item.question,
+          target: item.target,
+          display: item.display,
+          correctAnswer: item.correctAnswer,
+          userAnswer: item.userAnswer,
+          reactionTime: item.reactionTime
+        };
+      }
     });
-  
+    
     setRows(formattedRows);
-    console.log("Result data loaded:", formattedRows);
+    console.log("Result data loaded:", modeInfo, formattedRows);
 
     // Send request to backend immediately when component mounts
     const sendData = async () => {

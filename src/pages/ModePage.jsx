@@ -68,12 +68,12 @@ const ModePage = ({ onComplete }) => {
         // Assuming item.alternativeCharacter exists for the second option
         return {
           text: item.word,
-          target: item.character,
-          display: [
+          tar: item.character,
+          options: [
             `data:image/png;base64,${item.selectedVariantImage[0]}`,
             `data:image/png;base64,${item.selectedVariantImage[1]}`
           ],
-          ans: item.character,
+          ans: 0,
           zhuyin: toZhuyin[item.character]
         };
       }

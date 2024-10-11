@@ -2,14 +2,15 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
 
-const questions = [
-    { text: '相同', tar: '同', options: ['同', '桐'], ans: '同', zhuyin: 'ㄊㄨㄥˊ' },
-    { text: '你好', tar: '你', options: ['你', '尔'], ans: '你', zhuyin: 'ㄋㄧˇ' },
-    { text: '微風', tar: '微', options: ['徵', '微'], ans: '微', zhuyin: 'ㄨㄟˊ' },
-    { text: '月亮', tar: '月', options: ['月', '日'], ans: '月', zhuyin: 'ㄩㄝˋ' },
-    { text: '火車', tar: '火', options: ['人', '火'], ans: '火', zhuyin: 'ㄏㄨㄛˇ' },
-    { text: '日本好玩', tar: '日', options: ['日', '目'], ans: '日', zhuyin: 'ㄖˋ' },
-];
+/*
+const questions_old = [
+    { text: '相同', tar: '同', options: ['同', '桐'], ans: 0, zhuyin: 'ㄊㄨㄥˊ' },
+    { text: '你好', tar: '你', options: ['你', '尔'], ans: 0, zhuyin: 'ㄋㄧˇ' },
+    { text: '微風', tar: '微', options: ['徵', '微'], ans: 0, zhuyin: 'ㄨㄟˊ' },
+    { text: '月亮', tar: '月', options: ['月', '日'], ans: 0, zhuyin: 'ㄩㄝˋ' },
+    { text: '火車', tar: '火', options: ['人', '火'], ans: 0, zhuyin: 'ㄏㄨㄛˇ' },
+    { text: '日本好玩', tar: '日', options: ['日', '目'], ans: 0, zhuyin: 'ㄖˋ' },
+];*/
 
 const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, queIntervel, answerTiming, pronunciationType, onComplete, isFeedbackImmediately, isRetryIncorrect }) => {
   console.log(questions)
@@ -165,10 +166,16 @@ const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, que
                 <Button
                   variant="contained"
                   color={index === 0 ? "secondary" : "primary"}
-                  onClick={() => handleAnswer(option)}
+                  onClick={() => handleAnswer(index)}
                   style={{ color: 'white' }}
                 >
-                  {option}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                    <img 
+                      src={option} 
+                      alt="Question" 
+                      style={{ width: '3.2em', height: '3.2em', marginBottom: '0.5em' }} 
+                    />
+                  </div>
                 </Button>
               </Grid>
             ))}
