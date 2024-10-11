@@ -14,7 +14,7 @@ const cellStyle = {
     textOverflow: 'ellipsis',
 };
 
-const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
+const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionFormat }) => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [data, setData] = useState(null);
@@ -23,6 +23,10 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions }) => {
     const [selectedVariants, setSelectedVariants] = useState({});
     const [selectedItems, setSelectedItems] = useState([]);
     const fetchCharacters = useApi('api/characters-with-variants');
+    useEffect(()=>{
+        setSelectedVariants([])
+        setSelectedItems([])
+    }, [questionFormat])
 
     useEffect(() => {
         setIsLoading(true);

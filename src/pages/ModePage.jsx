@@ -435,6 +435,7 @@ const ModePage = ({ onComplete }) => {
             grade={selected.grade.charAt(0)} 
             level={selected.level}
             number={selected.number}
+            questionFormat={selected.questionFormat}
             onSelectQuestions={setSelectedQuestions}
           />
         </Box>
