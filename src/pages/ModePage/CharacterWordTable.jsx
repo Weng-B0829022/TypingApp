@@ -123,19 +123,25 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
                             ...prevVariants,
                             [item.id]: [0, 1]
                         }));
+                        newItems = [...prev, { 
+                            ...item, 
+                            order: prev.length + 1,
+                            selectedVariantImage: [item.variants[0].image, item.variants[1].image],
+                            isCorrectVariant: false
+                        }];
                     } else {
                         // 對於其他格式，選擇第一個變體
                         setSelectedVariants(prevVariants => ({
                             ...prevVariants,
                             [item.id]: 0
                         }));
+                        newItems = [...prev, { 
+                            ...item, 
+                            order: prev.length + 1,
+                            selectedVariantImage: item.variants[0].image,
+                            isCorrectVariant: true
+                        }];
                     }
-                    newItems = [...prev, { 
-                        ...item, 
-                        order: prev.length + 1,
-                        selectedVariantImage: item.variants[0].image,
-                        isCorrectVariant: questionFormat !== '二選一選擇題'
-                    }];
                 } else {
                     setError(`您只能選擇 ${number} 個題目。`);
                     setSnackbarOpen(true);

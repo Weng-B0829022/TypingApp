@@ -25,7 +25,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
     const questionNumbers = {};
     let mainQuestionCount = 0;
   
-    const formattedRows = answerInfo.map((item) => {
+    const formattedRows = answerInfo.map((item, index) => {
       if (!questionNumbers[item.question]) {
         mainQuestionCount++;
         questionNumbers[item.question] = {
@@ -40,16 +40,18 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
       const rowNumber = subNumber === 0 ? `${mainNumber}` : `${mainNumber}.${subNumber}`;
   
       if (modeInfo.questionFormat === "二選一選擇題") {
+        console.log(item)
         return {
           row: rowNumber ,
           question: item.question,
           target: item.target,
-          display: item.options, // 假設 item 中包含選項數組
-          correctAnswer: item.correctAnswer,
-          userAnswer: item.userAnswer,
+          display: [modeInfo.questions[index].options[0], modeInfo.questions[index].options[1]], // 假設 item 中包含選項數組
+          correctAnswer: modeInfo.questions[index].options[item.correctAnswer],
+          userAnswer: item.correctAnswer===item.userAnswer ? modeInfo.questions[index].options[0] : modeInfo.questions[index].options[1],
           reactionTime: item.reactionTime
         };
       } else {
+        
         return {
           row: rowNumber,
           question: item.question,
@@ -63,10 +65,10 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
     });
     
     setRows(formattedRows);
-    console.log("Result data loaded:", modeInfo, formattedRows);
+    console.log("modeInfo:", modeInfo, "formattedRows:",formattedRows);
 
     // Send request to backend immediately when component mounts
-    const sendData = async () => {
+    /*const sendData = async () => {
       try {
         const response = await fetch('http://localhost:8080/submit', {
           method: 'POST',
@@ -76,7 +78,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
           body: JSON.stringify({
             basicInfo,
             modeInfo,
-            resultInfo: formattedRows,
+            resultInfo,
           }),
         });
 
@@ -88,9 +90,9 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
       } catch (error) {
         console.error('Error sending request:', error);
       }
-    };
+    };*/
 
-    sendData();
+    //sendData();
   }, [answerInfo, basicInfo, modeInfo]);
 
   
@@ -138,12 +140,23 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
   const renderDisplay = (display) => {
     return (
       <TableCell sx={{ padding: '0px'}} align="right">
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {modeInfo.questionFormat === "二選一選擇題" ? 
+        <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
           <img 
-            src={display} 
+            src={display[0]} 
             alt="Question" 
-            style={{ width: '1.6em', height: '1.6em', marginBottom: '0.5em' }} 
-          />
+            style={{ width: '1.6em', height: '1.6em', }}/>
+          <img 
+            src={display[1]}
+            alt="Question"
+            style={{ width: '1.6em', height: '1.6em', }}/>
+        </div>:
+        <img 
+          src={display} 
+          alt="Question" 
+          style={{ width: '1.6em', height: '1.6em', marginBottom: '0.5em' }} 
+        />}
           {/* <Typography
             variant="h1"
             sx={{
@@ -155,10 +168,56 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
           >
             {target}
           </Typography> */}
-        </div>
+        </Box>
       </TableCell>
     );
   };
+
+  const renderCorrectAnswer = (correctAnswer) => {
+    return (
+      <TableCell sx={{ padding: '0px' }} align="right">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+        {modeInfo.questionFormat === "二選一選擇題" ? (
+          <img 
+            src={correctAnswer} 
+            alt="Correct Answer" 
+            style={{ width: '1.6em', height: '1.6em' }}
+          />
+        ) : (
+          correctAnswer
+        )}
+        </Box>
+      </TableCell>
+    );
+  };
+
+  const renderUserAnswer = (userAnswer, correctAnswer) => {
+    return (
+      <TableCell sx={{ padding: '0px' }} align="right">
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
+          {modeInfo.questionFormat === "二選一選擇題" ? (
+            <img 
+              src={userAnswer} 
+              alt="User Answer" 
+              style={{ width: '1.6em', height: '1.6em', marginRight: '4px' }}
+            />
+          ) : (
+            userAnswer
+          )}
+          {' ('}
+          <span style={{
+            color: userAnswer === correctAnswer ? 'green' : 'red',
+            marginLeft: '4px',
+            fontSize: '1.2em'
+          }}>
+            {userAnswer === correctAnswer ? '✓' : '✘'}
+          </span>
+          {')'}
+        </Box>
+      </TableCell>
+    );
+  };
+
   const handleExportExcel = () => {
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
@@ -200,21 +259,8 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
                   <TableCell sx={{ padding: '0px'}} align="right">{row.question}</TableCell>
                   <TableCell sx={{ padding: '0px'}} align="right">{row.target}</TableCell>
                   {renderDisplay(row.display)}
-                  <TableCell sx={{ padding: '0px'}} align="right">{row.correctAnswer}</TableCell>
-                  <TableCell sx={{ padding: '0px'}} align="right">
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end' }}>
-                      {row.userAnswer}
-                      {' ('}
-                      <span style={{
-                        color: row.userAnswer === row.correctAnswer ? 'green' : 'red',
-                        marginLeft: '4px',
-                        fontSize: '1.2em'
-                      }}>
-                        {row.userAnswer === row.correctAnswer ? '✓' : '✘'}
-                      </span>
-                      {')'}
-                    </Box>
-                  </TableCell>
+                  {renderCorrectAnswer(row.correctAnswer)}
+                  {renderUserAnswer(row.userAnswer, row.correctAnswer)}
                   <TableCell align="right">{row.reactionTime}</TableCell>
                 </TableRow>
               ))}
