@@ -67,18 +67,21 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
     setRows(formattedRows);
     console.log("modeInfo:", modeInfo, "formattedRows:",formattedRows);
 
-    // Send request to backend immediately when component mounts
-    /*const sendData = async () => {
+    // Send request to backend
+    const sendData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/submit', {
+        const response = await fetch('http://localhost:8080/postResult', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            basicInfo,
-            modeInfo,
-            resultInfo,
+
+            modeInfo:{
+              ...modeInfo,
+              name: basicInfo.name,
+              researchCode: basicInfo.researchCode,
+            },
           }),
         });
 
@@ -90,9 +93,9 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
       } catch (error) {
         console.error('Error sending request:', error);
       }
-    };*/
+    };
 
-    //sendData();
+    sendData();
   }, [answerInfo, basicInfo, modeInfo]);
 
   

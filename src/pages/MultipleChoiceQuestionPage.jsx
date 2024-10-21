@@ -97,16 +97,22 @@ const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, que
       onComplete(newAnswers);
     }
   };
-
   const renderQuestion = () => {
     const question = questions[questionIndex];
     if (pronunciationType === '注音') {
-      return question.text.replace(question.tar, question.zhuyin);
+      return question.text.replace(question.target, question.zhuyin);
     } else {
-      return question.text;
+      // 使用浏览器内置的 Web Speech API
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(question.text);
+        utterance.lang = 'zh-TW'; // 设置为繁体中文
+        window.speechSynthesis.speak(utterance);
+      } else {
+        console.warn('Text-to-speech not supported in this browser.');
+      }
+      return question.text.replace(question.target, question.zhuyin);
     }
   };
-
   return (
     <Container
       maxWidth="sm"
