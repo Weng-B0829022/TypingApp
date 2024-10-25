@@ -61,18 +61,17 @@ const TrueFalseQuestionPage = ({ startCountdown, queIntervel, answerTiming, pron
     }];
     setAnswers(newAnswers);
 
+    if (!isCorrect && isRetryIncorrect) {
+      if (errorRetry === '立即加入') {
+        // 如果答錯，立即在當前位置之後插入同一個問題
+        questions.splice(questionIndex + 1, 0, questions[questionIndex]);
+      } else if (errorRetry === '加入最後面') {
+        // 如果答錯，將當前問題添加到問題列表的末尾
+        questions.push(questions[questionIndex]);
+      }
+    }
     if (isFeedbackImmediately) {
       setFeedback(isCorrect ? 'correct' : 'incorrect');
-
-      if (!isCorrect && isRetryIncorrect) {
-        if (errorRetry === '立即加入') {
-          // 如果答錯，立即在當前位置之後插入同一個問題
-          questions.splice(questionIndex + 1, 0, questions[questionIndex]);
-        } else if (errorRetry === '加入最後面') {
-          // 如果答錯，將當前問題添加到問題列表的末尾
-          questions.push(questions[questionIndex]);
-        }
-      }
 
       setTimeout(() => {
         setFeedback(null);

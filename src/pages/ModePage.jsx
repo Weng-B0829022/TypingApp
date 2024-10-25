@@ -292,7 +292,7 @@ const ModePage = ({ onComplete }) => {
             ))}
           </Grid>
         </Box>
-        {selected.mode === '立即回饋' && (
+        {(
           <Box sx={boxStyle}>
             <Typography variant="h6" align="center" gutterBottom>
               答錯的題目是否重新加入 
