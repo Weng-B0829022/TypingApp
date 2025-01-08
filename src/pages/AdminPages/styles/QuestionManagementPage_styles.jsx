@@ -12,7 +12,7 @@ const commonStyles = {
       flexDirection: 'column',
       padding: '0px',
       overflowY: 'auto',
-      width: '100%',
+      width: '60%',
     },
   };
   
@@ -67,7 +67,7 @@ const commonStyles = {
   
   const detailsPanelStyles = {
     detailsPanel: {
-      width: '300px',
+      width: '400px',
       marginLeft: '16px',
       marginTop: '16px',
       backgroundColor: '#f8f8f8',

@@ -41,13 +41,14 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
   
       if (modeInfo.questionFormat === "二選一選擇題") {
         console.log(item)
+        const newOrder = [modeInfo.questions[index].options[item.correctAnswer ? 1 : 0], modeInfo.questions[index].options[item.correctAnswer ? 0 : 1]]
         return {
           row: rowNumber ,
           question: item.question,
           target: item.target,
-          display: [modeInfo.questions[index].options[0], modeInfo.questions[index].options[1]], // 假設 item 中包含選項數組
-          correctAnswer: modeInfo.questions[index].options[item.correctAnswer],
-          userAnswer: item.correctAnswer===item.userAnswer ? modeInfo.questions[index].options[0] : modeInfo.questions[index].options[1],
+          display: newOrder, // 假設 item 中包含選項數組
+          correctAnswer: newOrder[item.correctAnswer] ,
+          userAnswer: newOrder[item.userAnswer],
           reactionTime: item.reactionTime
         };
       } else {
@@ -65,12 +66,12 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
     });
     
     setRows(formattedRows);
-    console.log("modeInfo:", modeInfo, "formattedRows:",formattedRows);
 
     // Send request to backend
     const sendData = async () => {
       try {
-        const response = await fetch('http://localhost:8080/postResult', {
+        console.log("modeInfo:", modeInfo, "basicInfo:", basicInfo);
+        const response = await fetch('http://localhost:5001/api/quizResult', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -79,6 +80,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
 
             modeInfo:{
               ...modeInfo,
+              answerInfo: answerInfo,
               name: basicInfo.name,
               researchCode: basicInfo.researchCode,
             },

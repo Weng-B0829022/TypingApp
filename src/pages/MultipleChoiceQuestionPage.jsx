@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Container, Typography, Box, Button, Grid } from '@mui/material';
 import { CheckCircle, X } from 'lucide-react';
 
@@ -20,6 +20,14 @@ const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, que
   const [answers, setAnswers] = useState([]);
   const [feedback, setFeedback] = useState(null);
   const startTimeRef = useRef(null);
+
+  // 在組件初始化時對問題選項進行隨機排序
+  const shuffledQuestions = useMemo(() => {
+    return questions.map(question => ({
+      ...question,
+      options: Math.random() < 0.5 ? question.options : [...question.options].reverse(),
+    }));
+  }, [questions]);
 
   useEffect(() => {
     if (step === 0) {
@@ -56,28 +64,30 @@ const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, que
     const endTime = Date.now();
     const reactionTime = startTimeRef.current ? endTime - startTimeRef.current : null;
 
-    const isCorrect = answer === questions[questionIndex].ans;
+    const currentQuestion = shuffledQuestions[questionIndex];
+    const originalIndex = currentQuestion.options.indexOf(questions[questionIndex].options[currentQuestion.ans]);
+    const isCorrect = answer === originalIndex;
     const newAnswers = [...answers, { 
-      question: questions[questionIndex].text,
-      target: questions[questionIndex].tar,
+      question: currentQuestion.text,
+      target: currentQuestion.tar,
       userAnswer: answer,
-      correctAnswer: questions[questionIndex].ans,
+      correctAnswer: originalIndex,
       reactionTime: reactionTime
     }];
     setAnswers(newAnswers);
 
+    if (!isCorrect && isRetryIncorrect) {
+      if (errorRetry === '立即加入') {
+        // 如果答錯，立即在當前位置之後插入同一個問題
+        questions.splice(questionIndex + 1, 0, questions[questionIndex]);
+      } else if (errorRetry === '加入最後面') {
+        // 如果答錯，將當前問題添加到問題列表的末尾
+        questions.push(questions[questionIndex]);
+      }
+    }
+    
     if (isFeedbackImmediately) {
       setFeedback(isCorrect ? 'correct' : 'incorrect');
-
-      if (!isCorrect && isRetryIncorrect) {
-        if (errorRetry === '立即加入') {
-          // 如果答錯，立即在當前位置之後插入同一個問題
-          questions.splice(questionIndex + 1, 0, questions[questionIndex]);
-        } else if (errorRetry === '加入最後面') {
-          // 如果答錯，將當前問題添加到問題列表的末尾
-          questions.push(questions[questionIndex]);
-        }
-      }
 
       setTimeout(() => {
         setFeedback(null);
@@ -167,11 +177,11 @@ const MultipleChoiceQuestionPage = ({ questions, errorRetry, startCountdown, que
             </Typography>
           )}
           <Grid container spacing={2} justifyContent="center" mt={2}>
-            {questions[questionIndex].options.map((option, index) => (
+            {shuffledQuestions[questionIndex].options.map((option, index) => (
               <Grid item key={index}>
                 <Button
                   variant="contained"
-                  color={index === 0 ? "secondary" : "primary"}
+                  color="white"
                   onClick={() => handleAnswer(index)}
                   style={{ color: 'white' }}
                 >
