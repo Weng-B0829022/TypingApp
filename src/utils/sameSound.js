@@ -1,11 +1,10 @@
-
 const sameSound = {
     "是": [
         "事",
         "市",
         "示",
         "式"
-    ],
+    ], 
     "我": [],
     "有": [
         "友"
@@ -1220,3 +1219,4 @@ const sameSound = {
         "諦"
     ]
 }
+export default sameSound;

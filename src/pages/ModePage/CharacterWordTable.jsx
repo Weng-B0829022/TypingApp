@@ -6,6 +6,30 @@ import {
 import SearchIcon from '@mui/icons-material/Search';
 import MuiAlert from '@mui/material/Alert';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import sameSound from '../../utils/sameSound';
+
+const textToBase64Image = (text) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 60;  // 設置畫布大小
+    canvas.height = 60;
+    const ctx = canvas.getContext('2d');
+    
+    // 設置背景為淺明色 (#F5F5F5)
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // 設置文字樣式
+    ctx.fillStyle = 'black';
+    ctx.font = '60px "標楷體"';  // 使用標楷體
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    
+    // 繪製文字
+    ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+    
+    // 轉換為 base64
+    return canvas.toDataURL('image/png').split(',')[1];
+};
 
 const cellStyle = {
     padding: '6px 8px',
@@ -14,7 +38,7 @@ const cellStyle = {
     textOverflow: 'ellipsis',
 };
 
-const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionFormat }) => {
+const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionFormat, characterType }) => {
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [data, setData] = useState(null);
@@ -70,6 +94,31 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
     
         let filtered = gradeNumber ? data.filter(item => item.grade === gradeNumber) : data;
     
+        if (characterType === '同音字') {
+            filtered = filtered.filter(item => 
+                item.variants && 
+                item.variants.length > 0 && 
+                sameSound[item.character] && 
+                sameSound[item.character].length > 0
+            );
+            
+            filtered = filtered.map(item => ({
+                ...item,
+                variants: [
+                    {
+                        image: item.variants[0]?.image || '',
+                        file_path: item.variants[0]?.file_path || '',
+                        character: item.character
+                    },
+                    ...(sameSound[item.character] || []).map(char => ({
+                        image: '',
+                        file_path: `same_sound_${char}`,
+                        character: char
+                    }))
+                ]
+            }));
+        }
+    
         if (searchTerm) {
             filtered = filtered.filter(item => 
                 item.character.includes(searchTerm) || 
@@ -95,7 +144,7 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
                 return item.word_frequency < mediumThreshold;
             }
         });
-    }, [data, grade, level, searchTerm]);
+    }, [data, grade, level, searchTerm, characterType]);
 
     const handleSelect = useCallback((item) => {
         setSelectedItems(prev => {
@@ -152,6 +201,8 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
         });
     }, [number, setError, setSnackbarOpen, questionFormat]);
 
+    
+
     const handleVariantSelect = useCallback((item, variantIndex) => {
         setSelectedItems(prevItems => {
             const isItemSelected = prevItems.some(selected => selected.id === item.id);
@@ -163,17 +214,22 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
             }
             
             let newItems = [...prevItems];
-            
             const selectedVariant = item.variants[variantIndex];
+            const selectedChar = selectedVariant.character;
+            const generatedImage = selectedChar ? textToBase64Image(selectedChar) : selectedVariant.image;
             
             if (!isItemSelected) {
                 newItems.push({ 
                     ...item, 
                     order: newItems.length + 1,
                     selectedVariantImage: questionFormat === '二選一選擇題' 
-                        ? [item.variants[0].image, selectedVariant.image]
-                        : selectedVariant.image,
-                    isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0
+                        ? [
+                            textToBase64Image(item.variants[0].character),
+                            textToBase64Image(selectedVariant.character)
+                          ]
+                        : generatedImage,
+                    isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0,
+                    selectedCharacter: selectedChar
                 });
             } else {
                 newItems = newItems.map(selected => 
@@ -181,15 +237,18 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
                         ? { 
                             ...selected, 
                             selectedVariantImage: questionFormat === '二選一選擇題'
-                                ? [item.variants[0].image, selectedVariant.image]
-                                : selectedVariant.image,
-                            isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0
+                                ? [
+                                    textToBase64Image(item.variants[0].character),
+                                    textToBase64Image(selectedVariant.character)
+                                  ]
+                                : generatedImage,
+                            isCorrectVariant: questionFormat !== '二選一選擇題' && variantIndex === 0,
+                            selectedCharacter: selectedChar
                         }
                         : selected
                 );
             }
             
-            // 對於二選一選擇題，當選擇後面的選項時，自動選中第一個選項
             if (questionFormat === '二選一選擇題' && variantIndex > 0) {
                 setSelectedVariants(prev => ({
                     ...prev,
@@ -224,21 +283,43 @@ const CharacterWordTable = ({ grade, level, number, onSelectQuestions, questionF
                             sx={{ 
                                 position: 'relative', 
                                 width: '48px', 
-                                height: '48px'
+                                height: '48px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                border: '1px solid #e0e0e0',
+                                borderRadius: '4px',
+                                backgroundColor: isSelected ? 'rgba(25, 118, 210, 0.1)' : 'white',
+                                cursor: isSelectable ? 'pointer' : 'default',
+                                opacity: isSelected ? 0.8 : 1
                             }}
+                            onClick={() => isSelectable && handleVariantSelect(item, index)}
                         >
-                            <img 
-                                src={`data:image/png;base64,${variant.image}`}
-                                alt={variant.file_path}
-                                style={{ 
-                                    width: '100%', 
-                                    height: '100%', 
-                                    objectFit: 'contain', 
-                                    cursor: isSelectable ? 'pointer' : 'default',
-                                    opacity: isSelected ? 0.8 : 1
-                                }}
-                                onClick={() => isSelectable && handleVariantSelect(item, index)}
-                            />
+                            {variant.character ? (
+                                // 如果是同音字，直接顯示文字
+                                <Typography 
+                                    variant="h5" 
+                                    sx={{ 
+                                        // Start of Selection
+                                        fontSize: '3rem',
+                                        fontFamily: '"標楷體", sans-serif',
+                                        color: isSelected ? 'primary.main' : 'text.primary'
+                                    }}
+                                >
+                                    {variant.character}
+                                </Typography>
+                            ) : (
+                                // 如果有圖片，顯示圖片
+                                <img 
+                                    src={`data:image/png;base64,${variant.image}`}
+                                    alt={variant.file_path}
+                                    style={{ 
+                                        width: '100%',
+                                        height: '100%',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            )}
                             {/* 顯示選中的標記 */}
                             {isSelected && (
                                 <Box

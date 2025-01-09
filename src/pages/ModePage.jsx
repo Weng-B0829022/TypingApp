@@ -476,6 +476,7 @@ const ModePage = ({ onComplete }) => {
             number={selected.number}
             questionFormat={selected.questionFormat}
             onSelectQuestions={setSelectedQuestions}
+            characterType={selected.characterType}
           />
         </Box>
         <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>
