@@ -19,7 +19,8 @@ const ModePage = ({ onComplete }) => {
     questionFormat: '是非題',  // 新增：題目格式（是非題/二選一選擇題）
     answerTiming: '出題後答題',  
     isRetryIncorrect: '否',
-    errorRetry:'加入最後面' //0馬上 1最後面
+    errorRetry:'加入最後面' , //0馬上 1最後面
+    characterType: '相似字', // 新增：字形類別（相似字/同音字）
   });
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState('');
@@ -141,6 +142,28 @@ const ModePage = ({ onComplete }) => {
           padding: '20px',
         }}
       >
+        <Box sx={boxStyle}>
+          <Typography variant="h6" align="center" gutterBottom>
+            字形類別
+          </Typography>
+          <Grid container spacing={1}>
+            {['相似字', '同音字'].map((type) => (
+              <Grid item xs={6} key={type}>
+                <Button
+                  variant="contained"
+                  color={selected.characterType === type ? 'primary' : 'white'}
+                  fullWidth
+                  onClick={() => handleButtonClick('characterType', type)}
+                  style={{ color: selected.characterType === type ? 'white' : 'black' }}
+                  sx={buttonStyle}
+                >
+                  {type}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+
         <Box sx={boxStyle}>
           <Typography variant="h6" align="center" gutterBottom>
             題目格式 
@@ -453,6 +476,7 @@ const ModePage = ({ onComplete }) => {
             number={selected.number}
             questionFormat={selected.questionFormat}
             onSelectQuestions={setSelectedQuestions}
+            characterType={selected.characterType}
           />
         </Box>
         <Snackbar open={snackbarOpen} autoHideDuration={3000} onClose={handleCloseSnackbar}>

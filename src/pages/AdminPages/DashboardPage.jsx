@@ -152,11 +152,12 @@ const DashboardPage = () => {
       <Typography variant="h6" gutterBottom>詳細答題情況</Typography>
       <Typography><strong>姓名:</strong> {item.name}</Typography>
       <Typography><strong>研究代號:</strong> {item.researchCode}</Typography>
+      <Typography><strong>字形類別:</strong> {item.details.characterType}</Typography>
       <Typography><strong>字庫:</strong> {item.details.wordBank}</Typography>
       <Typography><strong>難易度:</strong> {item.details.difficulty}</Typography>
       <Typography><strong>題目數:</strong> {item.details.questionCount}</Typography>
       <Typography><strong>反饋模式:</strong> {item.details.mode || '未設定'}</Typography>
-      <Typography><strong>題型:</strong> {item.details.question_format}</Typography>
+      <Typography><strong>題目格式:</strong> {item.details.question_format}</Typography>
       <Typography><strong>注音類型:</strong> {item.details.pronunciation_type}</Typography>
       <Typography><strong>答題時機:</strong> {item.details.answer_timing}</Typography>
       <Typography><strong>錯題重試:</strong> {item.details.is_retry_incorrect}</Typography>
