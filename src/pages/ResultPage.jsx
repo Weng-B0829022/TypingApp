@@ -224,6 +224,7 @@ const ResultPage = ({ answerInfo, basicInfo, modeInfo, onComplete }) => {
   };
 
   const handleExportExcel = () => {
+    console.log(rows)
     const ws = utils.json_to_sheet(rows);
     const wb = utils.book_new();
     utils.book_append_sheet(wb, ws, "Results");

@@ -1,310 +1,301 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useCallback } from 'react';
 import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  TextField, 
   Button, 
   Typography,
-  useMediaQuery,
-  Collapse,
   Box,
-  Pagination,
-  IconButton,
   Snackbar,
-  Alert
+  Alert,
+  Tabs,
+  Tab,
 } from '@mui/material';
-import DeleteIcon from '@mui/icons-material/Delete';
-import { useTheme } from '@mui/material/styles';
-import DeleteConfirmationRow from './components/DeleteConfirmationRow';
-import styles from './styles/QuestionManagementPage_styles';
+import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import * as XLSX from 'xlsx';
 
-{/* <Typography><strong>字:</strong> {item.character}</Typography>
-<Typography><strong>部首:</strong> {item.radical}</Typography>
-<Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
-<Typography><strong>字頻:</strong> {item.character_frequency}</Typography>
-<Typography><strong>詞頻1:</strong> {item.word_frequency}</Typography>
-<Typography><strong>詞:</strong> {item.word}</Typography>
-<Typography><strong>年級:</strong> {item.grade}</Typography>
-<Typography><strong>變種數:</strong> {item.variant_num}</Typography>
-<Typography><strong>詞頻2:</strong> {item.words_frequency}</Typography> */}
-
-const ITEMS_PER_PAGE = 50; // 每页显示的项目数
-
-const QuestionManagementPage = ({ data }) => {
-
-  const [selectedRow, setSelectedRow] = useState(null);
-  const theme = useTheme();
-  const isMediumScreen = useMediaQuery(theme.breakpoints.down('lg'));
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('md'));
-  const [grade, setGrade] = useState('');
-  const [difficulty, setDifficulty] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [page, setPage] = useState(1);
-  const [deleteConfirmation, setDeleteConfirmation] = useState(null);
+const QuestionManagementPage = () => {
+  const [data, setData] = useState([]);
+  const [sheetNames, setSheetNames] = useState([]);
+  const [currentSheetIndex, setCurrentSheetIndex] = useState(0);
+  const [workbook, setWorkbook] = useState(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [snackbarSeverity, setSnackbarSeverity] = useState('success');
+  const [displayMode, setDisplayMode] = useState('basic'); // 'basic' 或 'detail'
 
-  const filteredData = useMemo(() => {
-    if (!data) return [];
-    
-    return data.filter(item => 
-      (item.character?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.word?.toLowerCase().includes(searchTerm.toLowerCase())) 
-      // (grade ? item.grade === grade : true) &&
-      // (difficulty ? item.difficulty === difficulty : true)
-    );
-  }, [searchTerm, grade, difficulty, data]);
+  const handleFileUpload = useCallback((event) => {
+    const file = event.target.files[0];
+    const reader = new FileReader();
 
-  const paginatedData = useMemo(() => {
-    const startIndex = (page - 1) * ITEMS_PER_PAGE;
-    return filteredData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredData, page]);
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, { type: 'array' });
+        setWorkbook(wb);
+        const sheetName = wb.SheetNames[0];
+        const worksheet = wb.Sheets[sheetName];
+        const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
-  const handleGradeChange = useCallback((newGrade) => {
-    setGrade(prevGrade => prevGrade === newGrade ? '' : newGrade);
-    setPage(1);                   //  重置頁碼
-    setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(null);           //  關閉詳細信息列
-  }, []);
+        console.log('工作表名稱:', wb.SheetNames);
+        console.log('原始數據:', jsonData);
 
-  const handleDifficultyChange = useCallback((newDifficulty) => {
-    setDifficulty(prevDifficulty => prevDifficulty === newDifficulty ? '' : newDifficulty);
-    setPage(1);                   //  重置頁碼
-    setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(null);           //  關閉詳細信息列
-  }, []);
+        if (jsonData.length === 0) {
+          throw new Error('Excel 文件中沒有數據');
+        }
 
-  const handleSearch = useCallback((event) => {
-    setSearchTerm(event.target.value);
-    setPage(1);                   //  重置頁碼
-    setDeleteConfirmation(null);  //  關閉刪除確認列
-    setSelectedRow(null);           //  關閉詳細信息列
-  }, []);
+        setSheetNames(wb.SheetNames);
+        setData(jsonData);
+        setCurrentSheetIndex(0);
+        setSnackbarMessage(`成功載入 ${jsonData.length} 筆數據！`);
+        setSnackbarSeverity('success');
+        setSnackbarOpen(true);
+      } catch (error) {
+        console.error('處理 Excel 檔案時發生錯誤:', error);
+        setSnackbarMessage(error.message || '檔案格式錯誤，請確認上傳的是正確的 Excel 檔案');
+        setSnackbarSeverity('error');
+        setSnackbarOpen(true);
+      }
+    };
 
-  const toggleDetails = useCallback((index) => {
-    setSelectedRow(prevSelectedRow => prevSelectedRow === index ? null : index);
-    setDeleteConfirmation(null);
-  }, []);
-
-  const handlePageChange = useCallback((event, value) => {
-    setPage(value);
-  }, []);
-
-  const handleDelete = useCallback((index) => {
-    console.log('index', index);
-    setSelectedRow(null);
-    setDeleteConfirmation(prevIndex => prevIndex === index ? null : index);
-  }, []);
-
-  const confirmDelete = useCallback((item) => {
-    setData(prevData => prevData.filter(dataItem => dataItem !== item));
-    setDeleteConfirmation(null);
-    setSelectedRow(null);
-    setSnackbarOpen(true);
-  }, []);
-
-  const handleSnackbarClose = useCallback(() => {
-    setSnackbarOpen(false);
-  }, []);
-
-  const renderDetails = useCallback((item) => (
-    item &&
-    <Box sx={{ margin: 1 }}>
-      <Typography><strong>字:</strong> {item.character}</Typography>
-      <Typography><strong>部首:</strong> {item.radical}</Typography>
-      <Typography><strong>筆劃:</strong> {item.stoke_count}</Typography>
-      <Typography><strong>字頻:</strong> {item.character_frequency}</Typography>
-      <Typography><strong>詞頻1:</strong> {item.word_frequency}</Typography>
-      <Typography><strong>詞:</strong> {item.word}</Typography>
-      <Typography><strong>年級:</strong> {item.grade}</Typography>
-      <Typography><strong>變種數:</strong> {item.variant_num}</Typography>
-      <Typography><strong>詞頻2:</strong> {item.words_frequency}</Typography>
-    </Box>
-  ), []);
-
-  // 使用 useEffect 来处理过滤后数据变化时的逻辑
-  useEffect(() => {
-    if (filteredData.length > 0 && (page - 1) * ITEMS_PER_PAGE >= filteredData.length) {
-      setPage(1);
+    if (file) {
+      reader.readAsArrayBuffer(file);
     }
-  }, [filteredData, page]);
+  }, []);
+
+  const handleSheetChange = (event, newIndex) => {
+    if (workbook && newIndex >= 0 && newIndex < sheetNames.length) {
+      const worksheet = workbook.Sheets[sheetNames[newIndex]];
+      const jsonData = XLSX.utils.sheet_to_json(worksheet);
+      setData(jsonData);
+      setCurrentSheetIndex(newIndex);
+    }
+  };
+
+  const handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setSnackbarOpen(false);
+  };
+
+  // 計算基本信息的欄位分組
+  const getBasicInfoColumns = useCallback((headers) => {
+    const allColumns = headers.filter(header => !['學號', '姓名', '班級'].includes(header));
+    const midPoint = Math.ceil(allColumns.length / 2);
+    return {
+      firstHalf: allColumns.slice(0, midPoint),
+      secondHalf: allColumns.slice(midPoint)
+    };
+  }, []);
+
+  // 添加一個新的輔助函數來檢查和處理可能的base64圖片
+  const renderCell = (cell) => {
+    // 檢查是否為字符串且包含"圖片"
+    if (typeof cell === 'string' && cell.includes('圖片')) {
+      // 檢查是否包含 base64 特徵
+      if (cell.includes('base64')) {
+        return (
+          <img 
+            src={cell} 
+            alt="題目圖片" 
+            style={{ 
+              maxWidth: '200px', 
+              maxHeight: '150px', 
+              objectFit: 'contain' 
+            }} 
+          />
+        );
+      }
+      
+      // 如果字符串看起來像是 base64 編碼（但沒有 data:image 前綴）
+      if (cell.match(/^[A-Za-z0-9+/=]+$/)) {
+        return (
+          <img 
+            src={`data:image/png;base64,${cell}`} 
+            alt="題目圖片" 
+            style={{ 
+              maxWidth: '200px', 
+              maxHeight: '150px', 
+              objectFit: 'contain' 
+            }} 
+          />
+        );
+      }
+    }
+    return cell;
+  };
 
   return (
-    <div style={isMediumScreen ? isSmallScreen ? {} : {display:'flex'} : styles.container}>
-      <div style={styles.mainContent}>
-        {/* 搜索区块 */}
-        <div style={styles.classPanel}>
-          <div style={styles.buttonSection}>
-            <Typography variant="subtitle1" gutterBottom>
-              年級
+    <Box sx={{ width: '100%', padding: 2 }}>
+      {/* 上傳按鈕區域 */}
+      <Box sx={{ 
+        p: 2, 
+        display: 'flex', 
+        flexDirection: 'column',  // 改為垂直排列
+        gap: 2
+      }}>
+        {/* 第一列：上傳按鈕和已載入數據提示 */}
+        <Box sx={{ 
+          display: 'flex', 
+          alignItems: 'center',
+          gap: 2
+        }}>
+          <Button
+            component="label"
+            variant="contained"
+            startIcon={<CloudUploadIcon />}
+          >
+            上傳 Excel 檔案
+            <input
+              type="file"
+              hidden
+              accept=".xlsx, .xls"
+              onChange={handleFileUpload}
+            />
+          </Button>
+          {data.length > 0 && (
+            <Typography variant="body2" color="text.secondary">
+              已載入 {data.length} 筆資料
             </Typography>
-            <div style={styles.buttonGroup}>
-              {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((g) => (
-                <Button 
-                  key={g} 
-                  variant={grade === g ? "contained" : "outlined"}
-                  onClick={() => handleGradeChange(g)}
-                  style={grade === g ? { ...styles.button, ...styles.selectedButton } : styles.button}
-                  fullWidth
-                >
-                  {g}
-                </Button>
-              ))}
-            </div>
-            <Typography variant="subtitle1" gutterBottom style={{textAlign: 'left', marginLeft:'80px'}}>
-              難度
+          )}
+        </Box>
+
+        {/* 第二列：工作表切換標籤 */}
+        {sheetNames.length > 0 && (
+          <Box sx={{ 
+            display: 'flex',
+            alignItems: 'center',
+            gap: 2,
+            width: '100%'
+          }}>
+            <Typography variant="body1" sx={{ whiteSpace: 'nowrap' }}>
+              當前工作表：
             </Typography>
-            <div style={styles.buttonGroup}>
-              <Box sx={{display:'flex'}}>
-                {['簡單', '中等', '困難'].map((d) => (
-                  <Button 
-                    key={d}
-                    variant={difficulty === d ? "contained" : "outlined"}
-                    onClick={() => handleDifficultyChange(d)}
-                    style={difficulty === d ? { ...styles.button, ...styles.selectedButton } : styles.button}
-                    fullWidth
-                  >
-                    {d}
-                  </Button>
-                ))}
-              </Box>
-              <div style={styles.searchSection}>
-                <TextField
-                  placeholder="搜尋姓名或研究代號..."
-                  variant="outlined"
-                  size="small"
-                  style={styles.searchInput}
-                  value={searchTerm}
-                  onChange={handleSearch}
+            <Tabs 
+              value={currentSheetIndex}
+              onChange={handleSheetChange}
+              variant="scrollable"
+              scrollButtons="auto"
+              sx={{ 
+                flex: 1,
+                minHeight: '40px',
+                '& .MuiTab-root': { minHeight: '40px' }
+              }}
+            >
+              {sheetNames.map((name, index) => (
+                <Tab 
+                  key={index} 
+                  label={name}
+                  sx={{ 
+                    textTransform: 'none',
+                    minHeight: '40px'
+                  }}
                 />
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* 数据区块 */}
-        <TableContainer component={Paper} style={styles.tableContainer}>
-          <Table stickyHeader aria-label="sticky table">
-            <TableHead>
-              <TableRow>
-                <TableCell>字</TableCell>
-                <TableCell>部首</TableCell>
-                <TableCell>筆劃</TableCell>
-                <TableCell>字頻</TableCell>
-                <TableCell>詞頻1</TableCell>
-                <TableCell>詞</TableCell>
-                <TableCell>年級</TableCell>
-                <TableCell>變種數</TableCell>
-                <TableCell>詞頻2</TableCell>
-                <TableCell>操作</TableCell>
-              </TableRow>
-            </TableHead>
-            {data && <TableBody>
-              {paginatedData.map((item, index) => (
-                <React.Fragment key={index}>
-                  <TableRow 
-                    style={selectedRow === index ? styles.selectedRow : {}}
-                  >
-                    <TableCell sx={{borderBottom: 'none'}}>{item.character}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.radical}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.stroke_count}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.character_frequency}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.word_frequency}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.word}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.grade}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.variant_num}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}>{item.words_frequency}</TableCell>
-                    <TableCell sx={{borderBottom: 'none'}}
-                    >
-                      <Button 
-                        onClick={() => toggleDetails(index)}
-                        color="primary"
-                        sx={{
-                          padding: isMediumScreen ? '2px' : '8px'
-                        }}
-                      >
-                        {selectedRow === index ? '隱藏詳情' : '查看詳情'}
-                      </Button>
-                      <IconButton 
-                        aria-label="delete" 
-                        onClick={() => handleDelete(index)}
-                        sx={{
-                          '&:focus': {
-                            outline: 'none',
-                            boxShadow: 'none',
-                          },
-                          width: isMediumScreen ? '30px' : '40px',
-                          height: isMediumScreen ? '30px' : '40px',
-                          padding: isMediumScreen ? '2px' : '8px',
-                        }}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                  {<TableRow>
-                      <TableCell colSpan={10} style={{ paddingBottom: 0, paddingTop: 0  }}>
-                        <Collapse in={deleteConfirmation === index} timeout="auto" unmountOnExit>
-                          <DeleteConfirmationRow
-                            index={index}
-                            onConfirm={() => confirmDelete(item)}
-                            onCancel={() => handleDelete(null)}
-                          />
-                        </Collapse>
-                      </TableCell>
-                  </TableRow>}
-                  {isMediumScreen && (
-                    <TableRow>
-                      <TableCell colSpan={3} style={{ paddingBottom: 0, paddingTop: 0 , borderBottom: 'none' }}>
-                        <Collapse in={selectedRow === index} timeout="auto" unmountOnExit>
-                          {renderDetails(item)}
-                        </Collapse>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </React.Fragment>
               ))}
-            </TableBody>}
-          </Table>
-        </TableContainer>
-        <Pagination
-          count={Math.ceil(filteredData.length / ITEMS_PER_PAGE)}
-          page={page}
-          onChange={handlePageChange}
-          color="primary"
-          style={{ 
-            marginTop: '-10px', 
-            display: 'flex', 
-            justifyContent: 'center' , 
-            backgroundColor: '#f8f8f8', 
-            zIndex: 999,
-            padding: '3px',
-            borderBottomLeftRadius: '8px',
-            borderBottomRightRadius: '8px'
-          }}
-        />
-      </div>
-      {!isMediumScreen && (
-        <div style={styles.detailsPanel}>
-          <Typography variant="h6" style={styles.detailsTitle}>
-            {selectedRow !== null ? '詳細信息' : '點擊詳細訊息查看'}
-          </Typography>
-          {selectedRow !== null && renderDetails(paginatedData[selectedRow])}
-        </div>
+            </Tabs>
+          </Box>
+        )}
+      </Box>
+
+      {/* 顯示數據表格 */}
+      {data.length > 0 && (
+        <Box sx={{ 
+          mt: 3, 
+          width: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2
+        }}>
+          {displayMode === 'basic' ? (
+            // 基本信息模式：單一表格
+            <Box sx={{ width: '100%', overflow: 'auto' }}>
+              <table style={{ 
+                width: '100%',
+                tableLayout: 'fixed',
+                borderCollapse: 'collapse'
+              }}>
+                <thead>
+                  <tr>
+                    {Object.keys(data[0]).map((header, index) => (
+                      <th key={index} style={{ 
+                        padding: '12px 16px',
+                        backgroundColor: '#f0f0f0',
+                        borderBottom: '1px solid #e0e0e0'
+                      }}>
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {Object.values(row).map((cell, cellIndex) => (
+                        <td key={cellIndex} style={{ 
+                          padding: '12px 16px',
+                          borderBottom: '1px solid #e0e0e0'
+                        }}>
+                          {renderCell(cell)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+          ) : (
+            // 答題詳情模式：完整表格
+            <Box sx={{ width: '100%', overflow: 'auto' }}>
+              <table style={{ 
+                width: '100%',
+                tableLayout: 'fixed',
+                borderCollapse: 'collapse'
+              }}>
+                <thead>
+                  <tr>
+                    {Object.keys(data[0]).map((header, index) => (
+                      <th key={index} style={{ 
+                        padding: '12px 16px',
+                        backgroundColor: '#f0f0f0',
+                        borderBottom: '1px solid #e0e0e0'
+                      }}>
+                        {header}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {data.map((row, rowIndex) => (
+                    <tr key={rowIndex}>
+                      {Object.values(row).map((cell, cellIndex) => (
+                        <td key={cellIndex} style={{ 
+                          padding: '12px 16px',
+                          borderBottom: '1px solid #e0e0e0'
+                        }}>
+                          {renderCell(cell)}
+                        </td>
+                      ))}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </Box>
+          )}
+        </Box>
       )}
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={5000}
         onClose={handleSnackbarClose}
-      > 
-        <Alert onClose={handleSnackbarClose} severity="success" sx={{ width: '100%' }}>
-          刪除成功
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleSnackbarClose} 
+          severity={snackbarSeverity}
+          sx={{ width: '100%' }}
+        >
+          {snackbarMessage}
         </Alert>
       </Snackbar>
-    </div>
+    </Box>
   );
 };
 

@@ -12,7 +12,6 @@ const commonStyles = {
       flexDirection: 'column',
       padding: '0px',
       overflowY: 'auto',
-      width: '60%',
     },
   };
   

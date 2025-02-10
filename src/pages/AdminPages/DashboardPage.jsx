@@ -168,7 +168,7 @@ const DashboardPage = () => {
         <>
           <Typography variant="h6" sx={{ mt: 2, mb: 1 }}>答題詳情</Typography>
           <Box sx={{ display: 'flex', justifyContent: 'start', width: '100%', overflowX: 'auto' }}>
-            <TableContainer component={Paper} style={{minWidth: '800px'}}>
+            <TableContainer component={Paper} style={{minWidth: '600px'}}>
               <Table size="small">
                 <TableHead>
                   <TableRow>
