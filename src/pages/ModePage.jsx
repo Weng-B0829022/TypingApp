@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Container, Typography, Box, Button, Grid, Accordion, AccordionSummary, AccordionDetails, TextField,
-  Snackbar, Alert
+  Snackbar, Alert, IconButton, Drawer
 } from '@mui/material';
 import { useTheme } from '@mui/material/styles';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import MenuIcon from '@mui/icons-material/Menu';
 import CharacterWordTable from './ModePage/CharacterWordTable';
 import toZhuyin from '../utils/toZhuyin';
 const ModePage = ({ onComplete }) => {
@@ -25,6 +26,7 @@ const ModePage = ({ onComplete }) => {
   const [questions, setQuestions] = useState([]);
   const [error, setError] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const handleCloseSnackbar = (event, reason) => {
     if (reason === 'clickaway') {
@@ -127,349 +129,398 @@ const ModePage = ({ onComplete }) => {
     boxShadow: 'none'  // 添加這行來去除陰影
   };
 
-  return (
-    <Grid container spacing={0}>
-      <Grid item xs={5} md={5}>
-      <Container
-        maxWidth="sm"
-        style={{
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          backgroundColor: theme.palette.background.default,
-          padding: '20px',
-        }}
-      >
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            字形類別
-          </Typography>
-          <Grid container spacing={1}>
-            {['相似字', '同音字'].map((type) => (
-              <Grid item xs={6} key={type}>
-                <Button
-                  variant="contained"
-                  color={selected.characterType === type ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('characterType', type)}
-                  style={{ color: selected.characterType === type ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {type}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+  const toggleDrawer = (open) => (event) => {
+    if (event.type === 'keydown' && (event.key === 'Tab' || event.key === 'Shift')) {
+      return;
+    }
+    setDrawerOpen(open);
+  };
 
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            題目格式 
-          </Typography>
-          <Grid container spacing={1}>
-            {['是非題', '二選一選擇題'].map((format) => (
-              <Grid item xs={6} key={format}>
-                <Button
-                  variant="contained"
-                  color={selected.questionFormat === format ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('questionFormat', format)}
-                  style={{ color: selected.questionFormat === format ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {format}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            答題時機 
-          </Typography>
-          <Grid container spacing={1}>
-            {['出題後答題', '出題時答題'].map((timing) => (
-              <Grid item xs={6} key={timing}>
-                <Button
-                  variant="contained"
-                  color={selected.answerTiming === timing ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('answerTiming', timing)}
-                  style={{ color: selected.answerTiming === timing ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {timing}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            題目顯示類型 
-          </Typography>
-          <Grid container spacing={1}>
-            {['注音', '發音'].map((type) => (
-              <Grid item xs={6} key={type}>
-                <Button
-                  variant="contained"
-                  color={selected.pronunciationType === type ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('pronunciationType', type)}
-                  style={{ color: selected.pronunciationType === type ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {type}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            字庫 
-          </Typography>
-          <Grid container spacing={1}>
-            {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((grade) => (
-              <Grid item xs={4} key={grade}>
-                <Button
-                  variant="contained"
-                  color={selected.grade === grade ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('grade', grade)}
-                  style={{ color: selected.grade === grade ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {grade}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            難易度 
-          </Typography>
-          <Grid container spacing={1}>
-            {['簡單', '中等', '困難'].map((level) => (
-              <Grid item xs={4} key={level}>
-                <Button
-                  variant="contained"
-                  color={selected.level === level ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('level', level)}
-                  style={{ color: selected.level === level ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {level}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            題目數 
-          </Typography>
-          <Grid container spacing={1}>
-            {['1', '5', '10'].map((number) => (
-              <Grid item xs={4} key={number}>
-                <Button
-                  variant="contained"
-                  color={selected.number === number ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('number', number)}
-                  style={{ color: selected.number === number ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {number}題
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-
-        <Box sx={boxStyle}>
-          <Typography variant="h6" align="center" gutterBottom>
-            回饋模式 
-          </Typography>
-          <Grid container spacing={1}>
-            {['立即回饋', '答題後回饋'].map((mode) => (
-              <Grid item xs={6} key={mode}>
-                <Button
-                  variant="contained"
-                  color={selected.mode === mode ? 'primary' : 'white'}
-                  fullWidth
-                  onClick={() => handleButtonClick('mode', mode)}
-                  style={{ color: selected.mode === mode ? 'white' : 'black' }}
-                  sx={buttonStyle}
-                >
-                  {mode}
-                </Button>
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
-        {(
-          <Box sx={boxStyle}>
-            <Typography variant="h6" align="center" gutterBottom>
-              答錯的題目是否重新加入 
-            </Typography>
-            <Grid container spacing={1}>
-              {['是', '否'].map((option) => (
-                <Grid item xs={6} key={option}>
-                  <Button
-                    variant="contained"
-                    color={selected.isRetryIncorrect === option ? 'primary' : 'white'}
-                    fullWidth
-                    onClick={() => handleButtonClick('isRetryIncorrect', option)}
-                    style={{ color: selected.isRetryIncorrect === option ? 'white' : 'black' }}
-                    sx={{
-                      '&:focus': {
-                        outline: 'none',
-                        boxShadow: 'none',
-                      },
-                    }}
-                  >
-                    {option}
-                  </Button>
-                </Grid>
-              ))}
+  const SettingsPanel = () => (
+    <Container
+      maxWidth="sm"
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: theme.palette.background.default,
+        padding: '20px',
+        width: '100%',
+      }}
+    >
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          字形類別
+        </Typography>
+        <Grid container spacing={1}>
+          {['相似字', '同音字'].map((type) => (
+            <Grid item xs={6} key={type}>
+              <Button
+                variant="contained"
+                color={selected.characterType === type ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('characterType', type)}
+                style={{ color: selected.characterType === type ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {type}
+              </Button>
             </Grid>
-          </Box>
-        )}
-        {selected.isRetryIncorrect === '是' && (
-          <Box sx={boxStyle}>
-            <Typography variant="h6" align="center" gutterBottom>
-              重新加入時穿插的位置 
-            </Typography>
-            <Grid container spacing={1}>
-              {['立即加入', '加入最後面'].map((option) => (
-                <Grid item xs={6} key={option}>
-                  <Button
-                    variant="contained"
-                    color={selected.errorRetry === option ? 'primary' : 'white'}
-                    fullWidth
-                    onClick={() => handleButtonClick('errorRetry', option)}
-                    style={{ color: selected.errorRetry === option ? 'white' : 'black' }}
-                    sx={{
-                      '&:focus': {
-                        outline: 'none',
-                        boxShadow: 'none',
-                      },
-                    }}
-                  >
-                    {option}
-                  </Button>
-                </Grid>
-              ))}
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          題目格式 
+        </Typography>
+        <Grid container spacing={1}>
+          {['是非題', '二選一選擇題'].map((format) => (
+            <Grid item xs={6} key={format}>
+              <Button
+                variant="contained"
+                color={selected.questionFormat === format ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('questionFormat', format)}
+                style={{ color: selected.questionFormat === format ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {format}
+              </Button>
             </Grid>
-          </Box>
-        )}
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          答題時機 
+        </Typography>
+        <Grid container spacing={1}>
+          {['出題後答題', '出題時答題'].map((timing) => (
+            <Grid item xs={6} key={timing}>
+              <Button
+                variant="contained"
+                color={selected.answerTiming === timing ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('answerTiming', timing)}
+                style={{ color: selected.answerTiming === timing ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {timing}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          題目顯示類型 
+        </Typography>
+        <Grid container spacing={1}>
+          {['注音', '發音'].map((type) => (
+            <Grid item xs={6} key={type}>
+              <Button
+                variant="contained"
+                color={selected.pronunciationType === type ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('pronunciationType', type)}
+                style={{ color: selected.pronunciationType === type ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {type}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          字庫 
+        </Typography>
+        <Grid container spacing={1}>
+          {['一年級', '二年級', '三年級', '四年級', '五年級', '六年級'].map((grade) => (
+            <Grid item xs={4} key={grade}>
+              <Button
+                variant="contained"
+                color={selected.grade === grade ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('grade', grade)}
+                style={{ color: selected.grade === grade ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {grade}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          難易度 
+        </Typography>
+        <Grid container spacing={1}>
+          {['簡單', '中等', '困難'].map((level) => (
+            <Grid item xs={4} key={level}>
+              <Button
+                variant="contained"
+                color={selected.level === level ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('level', level)}
+                style={{ color: selected.level === level ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {level}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          題目數 
+        </Typography>
+        <Grid container spacing={1}>
+          {['1', '5', '10'].map((number) => (
+            <Grid item xs={4} key={number}>
+              <Button
+                variant="contained"
+                color={selected.number === number ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('number', number)}
+                style={{ color: selected.number === number ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {number}題
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          回饋模式 
+        </Typography>
+        <Grid container spacing={1}>
+          {['立即回饋', '答題後回饋'].map((mode) => (
+            <Grid item xs={6} key={mode}>
+              <Button
+                variant="contained"
+                color={selected.mode === mode ? 'primary' : 'white'}
+                fullWidth
+                onClick={() => handleButtonClick('mode', mode)}
+                style={{ color: selected.mode === mode ? 'white' : 'black' }}
+                sx={buttonStyle}
+              >
+                {mode}
+              </Button>
+            </Grid>
+          ))}
+        </Grid>
+      </Box>
+      {(
         <Box sx={boxStyle}>
           <Typography variant="h6" align="center" gutterBottom>
-            詳細設置
+            答錯的題目是否重新加入 
           </Typography>
-          <Accordion 
-            sx={{ 
-              backgroundColor: 'transparent',
-              boxShadow: 'none',
-              '&:before': {
-                display: 'none',
-              },
+          <Grid container spacing={1}>
+            {['是', '否'].map((option) => (
+              <Grid item xs={6} key={option}>
+                <Button
+                  variant="contained"
+                  color={selected.isRetryIncorrect === option ? 'primary' : 'white'}
+                  fullWidth
+                  onClick={() => handleButtonClick('isRetryIncorrect', option)}
+                  style={{ color: selected.isRetryIncorrect === option ? 'white' : 'black' }}
+                  sx={{
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  {option}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+      {selected.isRetryIncorrect === '是' && (
+        <Box sx={boxStyle}>
+          <Typography variant="h6" align="center" gutterBottom>
+            重新加入時穿插的位置 
+          </Typography>
+          <Grid container spacing={1}>
+            {['立即加入', '加入最後面'].map((option) => (
+              <Grid item xs={6} key={option}>
+                <Button
+                  variant="contained"
+                  color={selected.errorRetry === option ? 'primary' : 'white'}
+                  fullWidth
+                  onClick={() => handleButtonClick('errorRetry', option)}
+                  style={{ color: selected.errorRetry === option ? 'white' : 'black' }}
+                  sx={{
+                    '&:focus': {
+                      outline: 'none',
+                      boxShadow: 'none',
+                    },
+                  }}
+                >
+                  {option}
+                </Button>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      )}
+      <Box sx={boxStyle}>
+        <Typography variant="h6" align="center" gutterBottom>
+          詳細設置
+        </Typography>
+        <Accordion 
+          sx={{ 
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            '&:before': {
+              display: 'none',
+            },
+          }}
+        >
+          <AccordionSummary
+            expandIcon={<ExpandMoreIcon />}
+            aria-controls="panel1a-content"
+            id="panel1a-header"
+          >
+            <Typography>點擊展開更多設置</Typography>
+          </AccordionSummary>
+          <AccordionDetails
+            sx={{
+              backgroundColor: '#F5F5F5',
+              borderRadius: 2,
+              mt: 1,
             }}
           >
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel1a-content"
-              id="panel1a-header"
-            >
-              <Typography>點擊展開更多設置</Typography>
-            </AccordionSummary>
-            <AccordionDetails
-              sx={{
-                backgroundColor: '#F5F5F5',
-                borderRadius: 2,
+            <Typography>
+              開始時準備時間 
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              name="startCountdown"
+              value={selected.startCountdown}
+              onChange={handleInputChange}
+              placeholder="輸入秒數"
+              sx={{ 
                 mt: 1,
+                width: '50%',   // 調整寬度
+                '& .MuiInputBase-root': {
+                  height: '30px', // 調整高度
+                },
+                '& .MuiInputBase-input': {
+                  padding: '5px 10px', // 調整內部填充
+                }
               }}
-            >
-              <Typography>
-                開始時準備時間 
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                name="startCountdown"
-                value={selected.startCountdown}
-                onChange={handleInputChange}
-                placeholder="輸入秒數"
-                sx={{ 
-                  mt: 1,
-                  width: '50%',   // 調整寬度
-                  '& .MuiInputBase-root': {
-                    height: '30px', // 調整高度
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '5px 10px', // 調整內部填充
-                  }
-                }}
-              />
-              <Typography>
-                題目顯示後的等待時間 
-              </Typography>
-              <TextField
-                fullWidth
-                type="number"
-                name="queIntervel"
-                value={selected.queIntervel}
-                onChange={handleInputChange}
-                placeholder="輸入秒數"
-                sx={{ 
-                  mt: 1,
-                  width: '50%',   // 調整寬度
-                  '& .MuiInputBase-root': {
-                    height: '30px', // 調整高度
-                  },
-                  '& .MuiInputBase-input': {
-                    padding: '5px 10px', // 調整內部填充
-                  }
-                }}
-              />
-            </AccordionDetails>
-          </Accordion>
-        </Box>
+            />
+            <Typography>
+              題目顯示後的等待時間 
+            </Typography>
+            <TextField
+              fullWidth
+              type="number"
+              name="queIntervel"
+              value={selected.queIntervel}
+              onChange={handleInputChange}
+              placeholder="輸入秒數"
+              sx={{ 
+                mt: 1,
+                width: '50%',   // 調整寬度
+                '& .MuiInputBase-root': {
+                  height: '30px', // 調整高度
+                },
+                '& .MuiInputBase-input': {
+                  padding: '5px 10px', // 調整內部填充
+                }
+              }}
+            />
+          </AccordionDetails>
+        </Accordion>
+      </Box>
 
-        <Button 
-          variant="contained" 
+      <Button 
+        variant="contained" 
+        color="primary" 
+        fullWidth
+        sx={{ mt: 2 }}
+        onClick={handleStart}
+      >
+        開始測驗
+      </Button>
+    </Container>
+  );
+
+  return (
+    <Grid container spacing={0}>
+      <Box sx={{ 
+        position: 'fixed', 
+        top: 10, 
+        left: 10, 
+        zIndex: 1200,
+        display: { xs: 'block', md: 'none' } 
+      }}>
+        <IconButton 
           color="primary" 
-          fullWidth
-          sx={{ mt: 2 }}
-          onClick={handleStart}
+          aria-label="open settings" 
+          onClick={toggleDrawer(true)}
+          sx={{ backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
         >
-          開始測驗
-        </Button>
-      </Container>
-      </Grid>
-      <Grid item xs={7} md={7}>
-      <Box
+          <MenuIcon />
+        </IconButton>
+      </Box>
+      
+      <Drawer
+        anchor="left"
+        open={drawerOpen}
+        onClose={toggleDrawer(false)}
         sx={{
-          position: 'fixed',
-          top: 0,
-          background:'#F5F5F5',
-          width: '55%', // 調整寬度以適應您的需求
-          zIndex: 1000,
-          height: '96vh',
-          overflowY: 'auto',
-          display: 'flex',
-          flexDirection: 'column',
-          padding:1 
+          '& .MuiDrawer-paper': { 
+            width: '85%',
+            maxWidth: '350px',
+            overflowY: 'auto'
+          },
+          display: { xs: 'block', md: 'none' }
         }}
       >
+        <Box sx={{ p: 1 }}>
+          <Button onClick={toggleDrawer(false)} sx={{ mb: 2 }}>關閉</Button>
+          <SettingsPanel />
+        </Box>
+      </Drawer>
+      
+      <Grid item xs={12} md={5} sx={{ display: { xs: 'none', md: 'block' } }}>
+        <SettingsPanel />
+      </Grid>
+      
+      <Grid item xs={12} md={7} sx={{ pl: { xs: 0, md: 2 } }}>
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0,
+            background:'#F5F5F5',
+            width: { xs: '100%', md: '55%' }, // 响应式宽度
+            zIndex: 1000,
+            height: '96vh',
+            overflowY: 'auto',
+            display: 'flex',
+            flexDirection: 'column',
+            padding: 1,
+            left: { xs: 0, md: 'auto' } // 在小屏幕上从左侧开始
+          }}
+        >
           <CharacterWordTable 
             grade={selected.grade.charAt(0)} 
             level={selected.level}

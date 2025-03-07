@@ -87,32 +87,17 @@ const QuestionManagementPage = () => {
 
   // 添加一個新的輔助函數來檢查和處理可能的base64圖片
   const renderCell = (cell) => {
-    // 檢查是否為字符串且包含"圖片"
-    if (typeof cell === 'string' && cell.includes('圖片')) {
-      // 檢查是否包含 base64 特徵
-      if (cell.includes('base64')) {
+    // 檢查是否為 base64 圖片
+    if (typeof cell === 'string') {
+      // 檢查是否符合 base64 圖片格式：data:image/[type];base64,
+      if (cell.match(/^data:image\/(jpeg|jpg|png|gif);base64,/)) {
         return (
           <img 
             src={cell} 
             alt="題目圖片" 
             style={{ 
-              maxWidth: '200px', 
-              maxHeight: '150px', 
-              objectFit: 'contain' 
-            }} 
-          />
-        );
-      }
-      
-      // 如果字符串看起來像是 base64 編碼（但沒有 data:image 前綴）
-      if (cell.match(/^[A-Za-z0-9+/=]+$/)) {
-        return (
-          <img 
-            src={`data:image/png;base64,${cell}`} 
-            alt="題目圖片" 
-            style={{ 
-              maxWidth: '200px', 
-              maxHeight: '150px', 
+              maxWidth: '25px', 
+              maxHeight: '25px', 
               objectFit: 'contain' 
             }} 
           />
@@ -181,9 +166,9 @@ const QuestionManagementPage = () => {
             >
               {sheetNames.map((name, index) => (
                 <Tab 
-                  key={index} 
+                  key={index}
                   label={name}
-                  sx={{ 
+                  sx={{
                     textTransform: 'none',
                     minHeight: '40px'
                   }}

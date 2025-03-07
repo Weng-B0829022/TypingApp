@@ -1,32 +1,19 @@
-# 第一階段：構建 Vite 應用
-FROM node:14 AS build
+# 使用官方 Node.js LTS 版本作為基礎映像
+FROM node:lts
 
-# 設置工作目錄
+# 設定工作目錄
 WORKDIR /app
 
-# 複製 package.json 和 package-lock.json
+# 複製 package.json 和 package-lock.json（如果有的話）
 COPY package*.json ./
 
-# 安裝依賴
-RUN npm install
+# 安裝依賴，包括 SQLite3
+RUN npm install && npm install sqlite3
 
-# 複製所有源文件
+# 複製應用程式程式碼
 COPY . .
 
-# 構建應用
-RUN npm run build
+# 暴露應用程式使用的端口（根據你的應用程式需求調整，例如 3000）
+EXPOSE 3000
 
-# 第二階段：使用 Nginx 提供靜態文件服務
-FROM nginx:alpine
-
-# 複製構建的文件到 Nginx 的 html 文件夾
-COPY --from=build /app/dist /usr/share/nginx/html
-
-# 複製簡化的 Nginx 配置文件
-COPY nginx.conf /etc/nginx/nginx.conf
-
-# 暴露端口
-EXPOSE 8080
-
-# 啟動 Nginx
-CMD ["nginx", "-g", "daemon off;"]
+#
